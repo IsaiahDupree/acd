@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acd.local/schema/feature.schema.json",
+  "title": "ACD Feature List",
+  "description": "Canonical shape for an ACD per-project feature list (data/features/<slug>.json). The 'passes' boolean is the load-bearing contract every runner reads to decide completion.",
+  "type": "object",
+  "required": ["features"],
+  "additionalProperties": true,
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Human-readable project name."
+    },
+    "slug": {
+      "type": "string",
+      "description": "Stable identifier; matches the filename (without .json)."
+    },
+    "version": {
+      "type": "string",
+      "description": "Feature-list version string."
+    },
+    "features": {
+      "type": "array",
+      "description": "Flat list of features. Never nested under categories.",
+      "items": { "$ref": "#/$defs/feature" }
+    }
+  },
+  "$defs": {
+    "feature": {
+      "type": "object",
+      "required": ["id", "title", "passes"],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Unique-within-file feature identifier."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Short label. Canonical field (legacy 'name' is migrated into this)."
+        },
+        "description": {
+          "type": "string",
+          "description": "Longer explanation of the feature."
+        },
+        "category": {
+          "type": "string",
+          "description": "Optional grouping label."
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "description": "Normalized priority bucket."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["todo", "in_progress", "done", "blocked"],
+          "description": "Normalized lifecycle status. Default derived from passes (passes ? 'done' : 'todo')."
+        },
+        "passes": {
+          "type": "boolean",
+          "description": "LOAD-BEARING: true when the feature is implemented and verified. Every runner reads this field."
+        },
+        "dependencies": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "IDs of features this one depends on."
+        },
+        "acceptance": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Acceptance criteria, one per string."
+        },
+        "files": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Files this feature touches or creates."
+        }
+      }
+    }
+  }
+}

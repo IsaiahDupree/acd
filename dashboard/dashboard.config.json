@@ -1,0 +1,109 @@
+{
+  "title": "ACD — Autonomous Coding Dashboard",
+  "subtitle": "Dispatch PRDs and run Claude Code agents across projects",
+  "views": [
+    {
+      "id": "fleet",
+      "name": "Fleet Overview",
+      "icon": "⚙",
+      "description": "Aggregate feature progress, repo coverage, and token usage across the agent fleet",
+      "panels": [
+        {
+          "id": "fleet-stats",
+          "type": "stats",
+          "span": 3
+        },
+        {
+          "id": "live-agents",
+          "type": "worker-grid",
+          "title": "Live Agents",
+          "span": 3
+        }
+      ]
+    },
+    {
+      "id": "coverage",
+      "name": "PRD Coverage",
+      "icon": "📋",
+      "description": "PRD / feature coverage and gap analysis across all queued projects",
+      "panels": [
+        {
+          "id": "prd-coverage",
+          "type": "prd-coverage",
+          "title": "PRD & Feature Coverage",
+          "span": 3
+        }
+      ]
+    },
+    {
+      "id": "projects",
+      "name": "Projects & Control",
+      "icon": "🛠",
+      "description": "Per-project control: harness start/stop, scheduler, and usage/cost",
+      "panels": [
+        {
+          "id": "projects-control",
+          "type": "projects-harness",
+          "title": "Projects, Harness Control, Schedule & Usage",
+          "span": 3
+        }
+      ]
+    },
+    {
+      "id": "queue",
+      "name": "Queue",
+      "icon": "📥",
+      "description": "Repo queue throughput and current job status",
+      "panels": [
+        {
+          "id": "queue-throughput",
+          "type": "metric-card",
+          "title": "Queue Throughput",
+          "span": 1,
+          "endpoint": "/api/dashboard-stats",
+          "refreshInterval": 15000,
+          "props": {
+            "fields": [
+              { "key": "queue.completedCount", "label": "Jobs Completed", "color": "green" },
+              { "key": "queue.currentRepo", "label": "Current Job", "color": "blue" },
+              { "key": "queue.uptime", "label": "Harness Uptime", "color": "gray" },
+              { "key": "errors.total", "label": "Total Errors", "color": "orange" }
+            ]
+          }
+        },
+        {
+          "id": "queue-repos",
+          "type": "metric-card",
+          "title": "Repo Coverage",
+          "span": 1,
+          "endpoint": "/api/dashboard-stats",
+          "refreshInterval": 15000,
+          "props": {
+            "fields": [
+              { "key": "repos.total", "label": "Repos Enabled", "color": "blue" },
+              { "key": "repos.complete", "label": "Repos Done", "color": "green" },
+              { "key": "repos.inProgress", "label": "In Progress", "color": "violet" },
+              { "key": "repos.queued", "label": "Queued", "color": "gray" }
+            ]
+          }
+        },
+        {
+          "id": "queue-harness",
+          "type": "metric-card",
+          "title": "Harness Status",
+          "span": 1,
+          "endpoint": "/api/agent-status",
+          "refreshInterval": 8000,
+          "props": {
+            "fields": [
+              { "key": "activeCount", "label": "Active Workers", "color": "blue" },
+              { "key": "doneCount", "label": "100% Done", "color": "green" },
+              { "key": "stalledCount", "label": "Stalled", "color": "orange" },
+              { "key": "avgHealth", "label": "Avg Health", "suffix": "%", "color": "violet" }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

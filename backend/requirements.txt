@@ -1,0 +1,10 @@
+fastapi>=0.104.1
+uvicorn>=0.24.0
+redis>=5.0.1
+pydantic>=2.5.0
+python-dotenv>=1.0.0
+httpx>=0.25.2
+websockets>=12.0
+
+# Agent SDK (when using actual Claude SDK)
+# claude-code-sdk>=0.1.0

@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dashboard/.next/
+backend/dist/
+*.tsbuildinfo
+
+# Python cruft (never track compiled python)
+__pycache__/
+*.pyc
+*.pyo
+
+# Runtime data + private project corpus — keep the layout, never publish content
+data/logs/
+data/pids/
+data/metrics/
+data/project-status/
+data/repo-queue.json
+data/schedule.json
+data/features/*
+!data/features/.gitkeep
+data/prds/*
+!data/prds/.gitkeep
+*.log
+*.pid
+
+# Local secrets — ignore ALL .env variants except the documented example
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+
+# Test artifacts
+test-results/
+playwright-report/
+coverage/
+
+# Backups (codemod + migration safety copies)
+*.bak
+data/features/.backup/
+
+# Engine runtime locks/state
+engine/.rate-limit-state.json
+engine/.rate-limit-state.lock
+engine/claude-usage.json
+engine/budget-state.json

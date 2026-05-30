@@ -1,0 +1,25 @@
+{
+  "name": "@acd/engine",
+  "version": "1.0.0",
+  "description": "ACD harness engine: spawns Claude Code agents to implement PRD features, with a priority queue, parallel workers, rate-limit coordination, and a 26-tool MCP server.",
+  "type": "module",
+  "main": "run-harness-v2.js",
+  "bin": {
+    "acd-harness": "./run-harness-v2.js",
+    "acd-queue": "./run-queue.js",
+    "acd-mcp": "./acd-mcp-server.js"
+  },
+  "scripts": {
+    "start": "node run-harness-v2.js",
+    "mcp": "node acd-mcp-server.js",
+    "queue": "node run-queue.js",
+    "validate": "node validate-features.js ../data/features",
+    "check": "for f in *.js; do node --check \"$f\" || exit 1; done && echo ok"
+  },
+  "dependencies": {
+    "pg": "^8.17.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

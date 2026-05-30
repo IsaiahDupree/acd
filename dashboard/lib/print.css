@@ -1,0 +1,119 @@
+/**
+ * Print Stylesheet (CF-WC-100)
+ *
+ * Print-friendly styles for clean printing.
+ */
+
+@media print {
+  /* Hide navigation, sidebar, and non-essential UI */
+  nav,
+  aside,
+  .sidebar,
+  .no-print,
+  [data-no-print],
+  button:not(.print-button),
+  .toast-container,
+  footer {
+    display: none !important;
+  }
+
+  /* Clean layout */
+  body {
+    margin: 0;
+    padding: 0;
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+
+  main {
+    margin: 0 !important;
+    padding: 1cm !important;
+    max-width: 100% !important;
+  }
+
+  /* Remove shadows and borders */
+  * {
+    box-shadow: none !important;
+    border-color: #ddd !important;
+  }
+
+  /* Optimize text */
+  h1, h2, h3, h4, h5, h6 {
+    color: black !important;
+    page-break-after: avoid;
+  }
+
+  p, li {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Tables */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  /* Links */
+  a {
+    color: black !important;
+    text-decoration: underline;
+  }
+
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 90%;
+  }
+
+  /* Page breaks */
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+
+  .page-break-avoid {
+    page-break-inside: avoid;
+  }
+
+  /* Images */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  /* Headers and footers */
+  @page {
+    margin: 2cm;
+  }
+
+  @page :first {
+    margin-top: 3cm;
+  }
+}
+
+/* Print button */
+.print-button {
+  cursor: pointer;
+}
+
+@media screen {
+  .print-only {
+    display: none;
+  }
+}
+
+@media print {
+  .print-only {
+    display: block;
+  }
+}

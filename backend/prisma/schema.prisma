@@ -1,0 +1,868 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name       String    @db.VarChar(255)
+  slug       String    @unique @db.VarChar(100)
+  plan       String?   @default("free") @db.VarChar(50)
+  settings   Json?     @default("{}")
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  memberships Membership[]
+
+  @@map("organizations")
+}
+
+model User {
+  id           String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email        String    @unique @db.VarChar(255)
+  name         String    @db.VarChar(255)
+  passwordHash String?   @map("password_hash") @db.VarChar(255)
+  avatarUrl    String?   @map("avatar_url") @db.VarChar(500)
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+
+  memberships  Membership[]
+  apiTokens    ApiToken[]
+  assignedWorkItems WorkItem[] @relation("WorkItemAssignee")
+
+  @@map("users")
+}
+
+model Membership {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  orgId      String    @map("org_id") @db.Uuid
+  role       String    @default("member") @db.VarChar(50)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  user       User         @relation(fields: [userId], references: [id])
+  org        Organization @relation(fields: [orgId], references: [id])
+
+  @@unique([userId, orgId])
+  @@map("memberships")
+}
+
+model ApiToken {
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id") @db.Uuid
+  name       String
+  tokenHash  String    @map("token_hash")
+  scopes     Json      @default("[]")
+  lastUsedAt DateTime? @map("last_used_at")
+  expiresAt  DateTime? @map("expires_at")
+  createdAt  DateTime  @default(now())
+
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@map("api_tokens")
+}
+
+model Project {
+  id               String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  orgId            String?        @map("org_id") @db.Uuid
+  name             String         @db.VarChar(255)
+  description      String?
+  status           ProjectStatus? @default(draft)
+  appSpecVersionId String?        @map("app_spec_version_id") @db.Uuid
+  touchLevel       String?        @default("medium") @map("touch_level") @db.VarChar(20)
+  profitPotential  String?        @default("medium") @map("profit_potential") @db.VarChar(20)
+  difficulty       String?        @default("medium") @db.VarChar(20)
+  automationMode   String?        @default("hybrid") @map("automation_mode") @db.VarChar(50)
+  iconUrl          String?        @map("icon_url") @db.VarChar(500)
+  color            String?        @default("#3B82F6") @db.VarChar(20)
+  nextAction       String?        @map("next_action")
+  createdBy        String?        @map("created_by") @db.Uuid
+  created_at       DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?      @default(now()) @db.Timestamptz(6)
+
+  appSpec          ProjectSpec?   @relation("ProjectAppSpec", fields: [appSpecVersionId], references: [id])
+  specs            ProjectSpec[]  @relation("ProjectSpecs")
+  repos            Repo[]
+  features         Feature[]
+  agents           Agent[]
+  workItems        WorkItem[]
+  testRuns         TestRun[]
+  testCases        TestCase[]
+
+  @@index([orgId], map: "idx_projects_org")
+  @@index([status], map: "idx_projects_status")
+  @@map("projects")
+}
+
+model ProjectSpec {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  projectId  String    @map("project_id") @db.Uuid
+  version    Int       @default(1)
+  content    String
+  createdBy  String?   @map("created_by") @db.Uuid
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  project       Project   @relation("ProjectSpecs", fields: [projectId], references: [id])
+  appSpecFor    Project[] @relation("ProjectAppSpec")
+
+  @@unique([projectId, version])
+  @@map("project_specs")
+}
+
+model Repo {
+  id                   String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  projectId            String          @map("project_id") @db.Uuid
+  provider             GitProviderType @default(github)
+  repoUrl              String          @map("repo_url") @db.VarChar(500)
+  defaultBranch        String?         @default("main") @map("default_branch") @db.VarChar(100)
+  installationId       String?         @map("installation_id") @db.VarChar(255)
+  accessTokenEncrypted String?         @map("access_token_encrypted")
+  workspacePath        String?         @map("workspace_path") @db.VarChar(500)
+  created_at           DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?       @default(now()) @db.Timestamptz(6)
+
+  project              Project         @relation(fields: [projectId], references: [id])
+
+  @@map("repos")
+}
+
+model Feature {
+  id                 String        @id @default(uuid())
+  projectId          String        @map("project_id")
+  featureKey         String        @map("feature_key")
+  title              String
+  description        String?
+  acceptanceCriteria Json          @default("[]") @map("acceptance_criteria")
+  priority           Int           @default(50)
+  status             FeatureStatus @default(pending)
+  source             String        @default("feature_list")
+  testPlan           Json?         @map("test_plan")
+  nonfunctional      Json?
+  sessionCompleted   Int?          @map("session_completed")
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  project            Project       @relation(fields: [projectId], references: [id])
+  testCases          TestCase[]
+  workItems          WorkItem[]
+
+  @@unique([projectId, featureKey])
+  @@index([projectId], map: "idx_features_project")
+  @@index([status], map: "idx_features_status")
+  @@map("features")
+}
+
+model WorkItem {
+  id              String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  projectId       String          @map("project_id") @db.Uuid
+  type            WorkItemType    @default(task)
+  status          WorkItemStatus? @default(idea)
+  title           String          @db.VarChar(255)
+  description     String?
+  assigneeUserId  String?         @map("assignee_user_id") @db.Uuid
+  assigneeAgentId String?         @map("assignee_agent_id") @db.Uuid
+  featureId       String?         @map("feature_id") @db.Uuid
+  parentId        String?         @map("parent_id") @db.Uuid
+  priority        Int?            @default(50)
+  storyPoints     Int?            @map("story_points")
+  sprintId        String?         @map("sprint_id") @db.Uuid
+  createdBy       String?         @map("created_by") @db.Uuid
+  created_at      DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?       @default(now()) @db.Timestamptz(6)
+
+  project         Project         @relation(fields: [projectId], references: [id])
+  feature         Feature?        @relation(fields: [featureId], references: [id])
+  assigneeUser    User?           @relation("WorkItemAssignee", fields: [assigneeUserId], references: [id])
+  parent          WorkItem?       @relation("WorkItemChildren", fields: [parentId], references: [id])
+  children        WorkItem[]      @relation("WorkItemChildren")
+
+  @@index([assigneeUserId], map: "idx_work_items_assignee")
+  @@index([projectId], map: "idx_work_items_project")
+  @@index([status], map: "idx_work_items_status")
+  @@map("work_items")
+}
+
+model WorkItemLink {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  sourceId   String    @map("source_id") @db.Uuid
+  targetId   String    @map("target_id") @db.Uuid
+  linkType   LinkType  @map("link_type")
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([sourceId, targetId, linkType])
+  @@map("work_item_links")
+}
+
+model TestCase {
+  id          String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  projectId   String       @map("project_id") @db.Uuid
+  featureId   String?      @map("feature_id") @db.Uuid
+  codePath    String?      @map("code_path") @db.VarChar(500)
+  name        String       @db.VarChar(255)
+  description String?
+  type        TestCaseType @default(unit)
+  tool        String?      @db.VarChar(50)
+  isRequired  Boolean?     @default(true) @map("is_required")
+  status      String?      @default("pending") @db.VarChar(50)
+  created_at  DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime?    @default(now()) @db.Timestamptz(6)
+
+  project     Project      @relation(fields: [projectId], references: [id])
+  feature     Feature?     @relation(fields: [featureId], references: [id])
+
+  @@map("test_cases")
+}
+
+model TestRun {
+  id           String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  projectId    String         @map("project_id") @db.Uuid
+  commitSha    String?        @map("commit_sha") @db.VarChar(40)
+  branch       String?        @db.VarChar(100)
+  triggeredBy  String         @map("triggered_by") @db.VarChar(50)
+  agentRunId   String?        @map("agent_run_id") @db.Uuid
+  status       TestRunStatus? @default(pending)
+  totalTests   Int?           @default(0) @map("total_tests")
+  passedTests  Int?           @default(0) @map("passed_tests")
+  failedTests  Int?           @default(0) @map("failed_tests")
+  skippedTests Int?           @default(0) @map("skipped_tests")
+  startedAt    DateTime?      @map("started_at") @db.Timestamptz(6)
+  finishedAt   DateTime?      @map("finished_at") @db.Timestamptz(6)
+  created_at   DateTime?      @default(now()) @db.Timestamptz(6)
+
+  project      Project        @relation(fields: [projectId], references: [id])
+
+  @@index([projectId], map: "idx_test_runs_project")
+  @@index([status], map: "idx_test_runs_status")
+  @@map("test_runs")
+}
+
+model TestRunResult {
+  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  testRunId   String    @map("test_run_id") @db.Uuid
+  testCaseId  String?   @map("test_case_id") @db.Uuid
+  testName    String?   @map("test_name") @db.VarChar(255)
+  status      String    @db.VarChar(50)
+  durationMs  Int?      @map("duration_ms")
+  errorOutput String?   @map("error_output")
+  stackTrace  String?   @map("stack_trace")
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@map("test_run_results")
+}
+
+model Agent {
+  id         String    @id @default(uuid())
+  projectId  String    @map("project_id")
+  type       AgentType
+  name       String
+  status     String    @default("enabled")
+  configJson Json      @default("{}") @map("config_json")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  project    Project   @relation(fields: [projectId], references: [id])
+
+  @@map("agents")
+}
+
+model AgentRun {
+  id                String         @id @default(uuid())
+  agentId           String         @map("agent_id")
+  projectId         String         @map("project_id")
+  runType           String         @map("run_type")
+  sessionNumber     Int            @default(1) @map("session_number")
+  targetFeatureId   String?        @map("target_feature_id")
+  status            AgentRunStatus @default(queued)
+  model             String         @default("claude-sonnet-4-5-20250929")
+  inputSnapshotRef  String?        @map("input_snapshot_ref")
+  outputSnapshotRef String?        @map("output_snapshot_ref")
+  featuresCompleted Int            @default(0) @map("features_completed")
+  commitsMade       Int            @default(0) @map("commits_made")
+  tokensUsed        Int            @default(0) @map("tokens_used")
+  errorMessage      String?        @map("error_message")
+  startedAt         DateTime?      @map("started_at")
+  finishedAt        DateTime?      @map("finished_at")
+  createdAt         DateTime       @default(now())
+
+  events            AgentRunEvent[]
+
+  @@index([projectId], map: "idx_agent_runs_project")
+  @@index([status], map: "idx_agent_runs_status")
+  @@map("agent_runs")
+}
+
+model AgentRunEvent {
+  id          String         @id @default(uuid())
+  agentRunId  String         @map("agent_run_id")
+  step        Int
+  eventType   AgentEventType @map("event_type")
+  payloadJson Json           @map("payload_json")
+  createdAt   DateTime       @default(now())
+
+  agentRun    AgentRun       @relation(fields: [agentRunId], references: [id])
+
+  @@index([agentRunId], map: "idx_agent_run_events_run")
+  @@map("agent_run_events")
+}
+
+model GitProvider {
+  id                  String          @id @default(uuid())
+  orgId               String          @map("org_id")
+  type                GitProviderType
+  name                String
+  apiBaseUrl          String?         @map("api_base_url")
+  appId               String?         @map("app_id")
+  privateKeyEncrypted String?         @map("private_key_encrypted")
+  createdAt           DateTime        @default(now())
+
+  @@map("git_providers")
+}
+
+model GitInstallation {
+  id                     String   @id @default(uuid())
+  providerId             String   @map("provider_id")
+  orgId                  String   @map("org_id")
+  externalInstallationId String   @map("external_installation_id")
+  accountName            String?  @map("account_name")
+  accountType            String?  @map("account_type")
+  permissions            Json?
+  createdAt              DateTime @default(now())
+
+  @@map("git_installations")
+}
+
+model Commit {
+  id               String           @id @default(uuid())
+  projectId        String           @map("project_id")
+  repoId           String?          @map("repo_id")
+  sha              String
+  branch           String
+  message          String
+  authorType       CommitAuthorType @map("author_type")
+  authorUserId     String?          @map("author_user_id")
+  authorAgentRunId String?          @map("author_agent_run_id")
+  filesChanged     Int?             @map("files_changed")
+  additions        Int?
+  deletions        Int?
+  createdAt        DateTime         @default(now())
+
+  @@index([projectId], map: "idx_commits_project")
+  @@map("commits")
+}
+
+model Notification {
+  id           String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId       String               @map("user_id") @db.Uuid
+  orgId        String?              @map("org_id") @db.Uuid
+  projectId    String?              @map("project_id") @db.Uuid
+  channel      NotificationChannel? @default(in_app)
+  type         String               @db.VarChar(100)
+  title        String               @db.VarChar(255)
+  body         String?
+  data         Json?
+  readAt       DateTime?            @map("read_at") @db.Timestamptz(6)
+  snoozedUntil DateTime?            @map("snoozed_until") @db.Timestamptz(6)
+  created_at   DateTime?            @default(now()) @db.Timestamptz(6)
+
+  @@index([userId], map: "idx_notifications_user")
+  @@map("notifications")
+}
+
+enum ProjectStatus {
+  draft
+  active
+  paused
+  archived
+  complete
+
+  @@map("project_status")
+}
+
+enum GitProviderType {
+  github
+  gitlab
+  bitbucket
+  local
+
+  @@map("git_provider")
+}
+
+enum FeatureStatus {
+  pending
+  in_progress
+  passing
+  failing
+  blocked
+
+  @@map("feature_status")
+}
+
+enum WorkItemType {
+  epic
+  story
+  task
+  bug
+  subtask
+
+  @@map("work_item_type")
+}
+
+enum WorkItemStatus {
+  idea
+  ready
+  in_progress
+  in_review
+  done
+  released
+  blocked
+
+  @@map("work_item_status")
+}
+
+enum LinkType {
+  blocks
+  is_blocked_by
+  relates_to
+  tests
+  duplicates
+
+  @@map("link_type")
+}
+
+enum TestCaseType {
+  unit
+  integration
+  e2e
+  regression
+  smoke
+  performance
+  accessibility
+
+  @@map("test_case_type")
+}
+
+enum TestRunStatus {
+  pending
+  running
+  passed
+  failed
+  cancelled
+
+  @@map("test_run_status")
+}
+
+enum AgentType {
+  initializer
+  coding
+  planner
+  qa
+  release
+  analytics
+
+  @@map("agent_type")
+}
+
+enum AgentRunStatus {
+  queued
+  running
+  completed
+  failed
+  cancelled
+
+  @@map("agent_run_status")
+}
+
+enum AgentEventType {
+  tool_call
+  tool_result
+  message
+  test_run
+  commit
+  error
+  status_change
+
+  @@map("agent_event_type")
+}
+
+enum CommitAuthorType {
+  user
+  agent
+
+  @@map("commit_author_type")
+}
+
+enum NotificationChannel {
+  in_app
+  email
+  slack
+  webhook
+
+  @@map("notification_channel")
+}
+
+// ============================================
+// ACD Enhanced Tracking Models
+// ============================================
+
+// Target: Tracks repos from repo-queue.json
+model Target {
+  id              String           @id @default(uuid())
+  repoId          String           @unique @map("repo_id")
+  name            String
+  path            String
+  priority        Int              @default(99)
+  complexity      TargetComplexity @default(medium)
+  enabled         Boolean          @default(true)
+  focus           String?
+  totalFeatures   Int              @default(0) @map("total_features")
+  passingFeatures Int              @default(0) @map("passing_features")
+  percentComplete Float            @default(0) @map("percent_complete")
+  lastSessionAt   DateTime?        @map("last_session_at")
+  lastModel       String?          @map("last_model")
+  status          TargetStatus     @default(pending)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  sessions        HarnessSession[]
+  snapshots       ProgressSnapshot[]
+  features        TargetFeature[]
+  codebaseIndexes CodebaseIndex[]
+  fileAccessLogs  FileAccessLog[]
+
+  // Codebase metrics
+  lastIndexedAt   DateTime?        @map("last_indexed_at")
+  indexSizeTokens Int              @default(0) @map("index_size_tokens")
+  totalFiles      Int              @default(0) @map("total_files")
+  totalLoc        Int              @default(0) @map("total_loc")
+
+  @@index([repoId], map: "idx_targets_repo_id")
+  @@index([status], map: "idx_targets_status")
+  @@map("targets")
+}
+
+// HarnessSession: Tracks each harness run
+model HarnessSession {
+  id                String              @id @default(uuid())
+  targetId          String              @map("target_id")
+  sessionNumber     Int                 @map("session_number")
+  sessionType       String              @map("session_type")
+  model             String
+  status            HarnessSessionStatus @default(running)
+  featuresBefore    Int                 @default(0) @map("features_before")
+  featuresAfter     Int                 @default(0) @map("features_after")
+  featuresCompleted Int                 @default(0) @map("features_completed")
+  inputTokens       Int                 @default(0) @map("input_tokens")
+  outputTokens      Int                 @default(0) @map("output_tokens")
+  cacheReadTokens   Int                 @default(0) @map("cache_read_tokens")
+  cacheWriteTokens  Int                 @default(0) @map("cache_write_tokens")
+  costUsd           Float               @default(0) @map("cost_usd")
+  durationMs        Int                 @default(0) @map("duration_ms")
+  apiLatencyMs      Int                 @default(0) @map("api_latency_ms")
+  wallClockMs       Int                 @default(0) @map("wall_clock_ms")
+  turnCount         Int                 @default(0) @map("turn_count")
+  retryCount        Int                 @default(0) @map("retry_count")
+  modelFallbacks    Int                 @default(0) @map("model_fallbacks")
+  testsRun          Int                 @default(0) @map("tests_run")
+  testsPassed       Int                 @default(0) @map("tests_passed")
+  testsFailed       Int                 @default(0) @map("tests_failed")
+  testPassRate      Float?              @map("test_pass_rate")
+  contextUtilization Float?             @map("context_utilization")
+  cacheHitRate      Float?              @map("cache_hit_rate")
+  errorType         String?             @map("error_type")
+  errorMessage      String?             @map("error_message")
+  commitsMade       Int                 @default(0) @map("commits_made")
+  startedAt         DateTime            @default(now()) @map("started_at")
+  finishedAt        DateTime?           @map("finished_at")
+  createdAt         DateTime            @default(now())
+
+  target            Target              @relation(fields: [targetId], references: [id])
+  turns             SessionTurn[]
+  retries           SessionRetry[]
+
+  @@index([targetId], map: "idx_harness_sessions_target")
+  @@index([status], map: "idx_harness_sessions_status")
+  @@index([startedAt], map: "idx_harness_sessions_started")
+  @@map("harness_sessions")
+}
+
+// ProgressSnapshot: Daily/hourly progress tracking
+model ProgressSnapshot {
+  id              String   @id @default(uuid())
+  targetId        String   @map("target_id")
+  totalFeatures   Int      @map("total_features")
+  passingFeatures Int      @map("passing_features")
+  percentComplete Float    @map("percent_complete")
+  sessionsToday   Int      @default(0) @map("sessions_today")
+  tokensToday     Int      @default(0) @map("tokens_today")
+  costToday       Float    @default(0) @map("cost_today")
+  snapshotDate    DateTime @map("snapshot_date") @db.Date
+  createdAt       DateTime @default(now())
+
+  target          Target   @relation(fields: [targetId], references: [id])
+
+  @@unique([targetId, snapshotDate])
+  @@index([targetId], map: "idx_progress_snapshots_target")
+  @@index([snapshotDate], map: "idx_progress_snapshots_date")
+  @@map("progress_snapshots")
+}
+
+// ModelUsage: Track model usage and costs
+model ModelUsage {
+  id           String   @id @default(uuid())
+  model        String
+  inputTokens  Int      @default(0) @map("input_tokens")
+  outputTokens Int      @default(0) @map("output_tokens")
+  totalTokens  Int      @default(0) @map("total_tokens")
+  costUsd      Float    @default(0) @map("cost_usd")
+  requestCount Int      @default(1) @map("request_count")
+  usageDate    DateTime @map("usage_date") @db.Date
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([model, usageDate])
+  @@index([model], map: "idx_model_usage_model")
+  @@index([usageDate], map: "idx_model_usage_date")
+  @@map("model_usage")
+}
+
+// QueueStatus: Track overall queue state
+model QueueStatus {
+  id               String    @id @default(uuid())
+  currentTargetId  String?   @map("current_target_id")
+  queueStartedAt   DateTime? @map("queue_started_at")
+  totalSessions    Int       @default(0) @map("total_sessions")
+  totalTokens      Int       @default(0) @map("total_tokens")
+  totalCostUsd     Float     @default(0) @map("total_cost_usd")
+  completedTargets Int       @default(0) @map("completed_targets")
+  isRunning        Boolean   @default(false) @map("is_running")
+  lastUpdated      DateTime  @default(now()) @map("last_updated")
+  createdAt        DateTime  @default(now())
+
+  @@map("queue_status")
+}
+
+enum TargetComplexity {
+  low
+  medium
+  high
+
+  @@map("target_complexity")
+}
+
+enum TargetStatus {
+  pending
+  active
+  complete
+  paused
+  error
+
+  @@map("target_status")
+}
+
+enum HarnessSessionStatus {
+  running
+  completed
+  failed
+  cancelled
+
+  @@map("harness_session_status")
+}
+
+// ============================================
+// Enhanced Tracking Models
+// ============================================
+
+// TargetFeature: Individual features from feature_list.json
+model TargetFeature {
+  id            String   @id @default(uuid())
+  targetId      String   @map("target_id")
+  featureKey    String   @map("feature_key")
+  name          String
+  description   String?
+  category      String?
+  priority      Int      @default(50)
+  status        String   @default("pending")
+  passes        Boolean  @default(false)
+  implementedAt DateTime? @map("implemented_at")
+  sessionId     String?  @map("session_id")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  target        Target   @relation(fields: [targetId], references: [id])
+
+  @@unique([targetId, featureKey])
+  @@index([targetId], map: "idx_target_features_target")
+  @@index([status], map: "idx_target_features_status")
+  @@map("target_features")
+}
+
+// HarnessLog: Logs from harness runs
+model HarnessLog {
+  id          String   @id @default(uuid())
+  sessionId   String   @map("session_id")
+  level       String   @default("info")
+  message     String
+  metadata    Json?
+  timestamp   DateTime @default(now())
+
+  @@index([sessionId], map: "idx_harness_logs_session")
+  @@index([level], map: "idx_harness_logs_level")
+  @@index([timestamp], map: "idx_harness_logs_timestamp")
+  @@map("harness_logs")
+}
+
+// HarnessCommit: Git commits made during sessions
+model HarnessCommit {
+  id           String   @id @default(uuid())
+  sessionId    String   @map("session_id")
+  targetId     String   @map("target_id")
+  sha          String
+  message      String
+  filesChanged Int      @default(0) @map("files_changed")
+  additions    Int      @default(0)
+  deletions    Int      @default(0)
+  branch       String   @default("main")
+  createdAt    DateTime @default(now())
+
+  @@index([sessionId], map: "idx_harness_commits_session")
+  @@index([targetId], map: "idx_harness_commits_target")
+  @@map("harness_commits")
+}
+
+// HarnessError: Detailed error tracking
+model HarnessError {
+  id          String   @id @default(uuid())
+  sessionId   String?  @map("session_id")
+  targetId    String   @map("target_id")
+  errorType   String   @map("error_type")
+  errorCode   String?  @map("error_code")
+  message     String
+  stackTrace  String?  @map("stack_trace")
+  context     Json?
+  resolved    Boolean  @default(false)
+  resolvedAt  DateTime? @map("resolved_at")
+  createdAt   DateTime @default(now())
+
+  @@index([targetId], map: "idx_harness_errors_target")
+  @@index([errorType], map: "idx_harness_errors_type")
+  @@index([resolved], map: "idx_harness_errors_resolved")
+  @@map("harness_errors")
+}
+
+// TokenUsageDetail: Granular token tracking
+model TokenUsageDetail {
+  id              String   @id @default(uuid())
+  sessionId       String   @map("session_id")
+  model           String
+  inputTokens     Int      @default(0) @map("input_tokens")
+  outputTokens    Int      @default(0) @map("output_tokens")
+  cacheReadTokens Int      @default(0) @map("cache_read_tokens")
+  cacheWriteTokens Int     @default(0) @map("cache_write_tokens")
+  costUsd         Float    @default(0) @map("cost_usd")
+  toolName        String?  @map("tool_name")
+  createdAt       DateTime @default(now())
+
+  @@index([sessionId], map: "idx_token_usage_session")
+  @@index([model], map: "idx_token_usage_model")
+  @@map("token_usage_details")
+}
+
+// SessionTurn: Turn-by-turn metrics within a session
+model SessionTurn {
+  id            String   @id @default(uuid())
+  sessionId     String   @map("session_id")
+  turnNumber    Int      @map("turn_number")
+  inputTokens   Int      @default(0) @map("input_tokens")
+  outputTokens  Int      @default(0) @map("output_tokens")
+  toolCalls     Json?    @map("tool_calls")
+  startedAt     DateTime @default(now()) @map("started_at")
+  finishedAt    DateTime? @map("finished_at")
+  durationMs    Int      @default(0) @map("duration_ms")
+  createdAt     DateTime @default(now())
+
+  session       HarnessSession @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId], map: "idx_session_turns_session")
+  @@map("session_turns")
+}
+
+// SessionRetry: Track retry attempts
+model SessionRetry {
+  id            String   @id @default(uuid())
+  sessionId     String   @map("session_id")
+  retryNumber   Int      @map("retry_number")
+  reason        String   // rate_limit, error, timeout, model_fallback
+  originalModel String?  @map("original_model")
+  fallbackModel String?  @map("fallback_model")
+  waitDurationMs Int     @default(0) @map("wait_duration_ms")
+  succeeded     Boolean  @default(false)
+  errorMessage  String?  @map("error_message")
+  createdAt     DateTime @default(now())
+
+  session       HarnessSession @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId], map: "idx_session_retries_session")
+  @@map("session_retries")
+}
+
+// CodebaseIndex: Track codebase size and structure
+model CodebaseIndex {
+  id              String   @id @default(uuid())
+  targetId        String   @map("target_id")
+  totalFiles      Int      @default(0) @map("total_files")
+  totalLines      Int      @default(0) @map("total_lines")
+  totalSizeBytes  BigInt   @default(0) @map("total_size_bytes")
+  indexSizeTokens Int      @default(0) @map("index_size_tokens")
+  buildDurationMs Int      @default(0) @map("build_duration_ms")
+  fileTypes       Json?    @map("file_types") // {"ts": 150, "js": 50}
+  largestFiles    Json?    @map("largest_files") // Top 10 by size
+  indexedAt       DateTime @default(now()) @map("indexed_at")
+  createdAt       DateTime @default(now())
+
+  target          Target   @relation(fields: [targetId], references: [id])
+
+  @@index([targetId], map: "idx_codebase_index_target")
+  @@map("codebase_indexes")
+}
+
+// ContextUsage: Track context window utilization per session
+model ContextUsage {
+  id                  String   @id @default(uuid())
+  sessionId           String   @map("session_id")
+  turnNumber          Int      @default(0) @map("turn_number")
+  systemTokens        Int      @default(0) @map("system_tokens")
+  featureTokens       Int      @default(0) @map("feature_tokens")
+  fileTokens          Int      @default(0) @map("file_tokens")
+  conversationTokens  Int      @default(0) @map("conversation_tokens")
+  totalTokens         Int      @default(0) @map("total_tokens")
+  contextLimit        Int      @default(200000) @map("context_limit")
+  utilization         Float    @default(0)
+  overflowOccurred    Boolean  @default(false) @map("overflow_occurred")
+  createdAt           DateTime @default(now())
+
+  @@index([sessionId], map: "idx_context_usage_session")
+  @@map("context_usage")
+}
+
+// FileAccessLog: Track frequently accessed files for caching
+model FileAccessLog {
+  id            String   @id @default(uuid())
+  targetId      String   @map("target_id")
+  filePath      String   @map("file_path")
+  accessCount   Int      @default(1) @map("access_count")
+  avgTokens     Int      @default(0) @map("avg_tokens")
+  isCached      Boolean  @default(false) @map("is_cached")
+  lastAccessedAt DateTime @default(now()) @map("last_accessed_at")
+  createdAt     DateTime @default(now())
+
+  target        Target   @relation(fields: [targetId], references: [id])
+
+  @@unique([targetId, filePath])
+  @@index([targetId], map: "idx_file_access_target")
+  @@index([accessCount], map: "idx_file_access_count")
+  @@map("file_access_log")
+}

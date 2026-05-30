@@ -1,0 +1,35 @@
+{
+  "name": "acd",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Autonomous Coding Dashboard — a standalone utility for dispatching PRDs and running Claude Code agents across many projects at scale.",
+  "type": "module",
+  "workspaces": [
+    "engine",
+    "dashboard",
+    "backend"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm --prefix engine install && npm --prefix dashboard install && npm --prefix backend install",
+    "mcp": "node engine/acd-mcp-server.js",
+    "dispatch": "node engine/run-harness-v2.js",
+    "queue": "node engine/run-queue.js",
+    "status": "bash engine/acd-status.sh",
+    "dashboard": "npm --prefix dashboard run dev",
+    "backend": "npm --prefix backend run dev",
+    "validate:features": "node engine/validate-features.js data/features",
+    "check": "for f in engine/*.js; do node --check \"$f\" || exit 1; done && echo all-engine-ok"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "autonomous-coding",
+    "agent-harness",
+    "orchestration",
+    "mcp"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
