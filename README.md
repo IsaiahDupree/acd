@@ -2,6 +2,10 @@
 
 ACD dispatches and supervises **Claude Code agents** that implement software PRDs feature-by-feature, at scale, across many repositories. You write a PRD, ACD turns it into a testable feature list, queues the project, and spawns the `claude` CLI in a self-restarting harness until the features pass. A dashboard and backend give live visibility, and a 26-tool MCP server lets other agents (and you) drive the whole thing programmatically.
 
+For the Codex-to-Claude operating procedure, OAuth setup, worktree isolation,
+fleet coordination, and review gates, see
+[`docs/CONTROLLING-CLAUDE-CODE-FROM-CODEX.md`](docs/CONTROLLING-CLAUDE-CODE-FROM-CODEX.md).
+
 - **Engine** — Node ESM harness: spawns agents, runs a priority queue with a global concurrency cap, coordinates rate limits, and exposes the MCP server.
 - **Dashboard** — Next.js UI for monitoring runs and feature progress.
 - **Backend** — REST API the dashboard reads from.
@@ -50,9 +54,15 @@ acd/
 Requires Node >= 20 and the `claude` CLI on PATH, authenticated via OAuth.
 
 ```bash
-cp .env.example .env        # fill in CLAUDE_CODE_OAUTH_TOKEN, Supabase, etc.
+claude auth login
+claude auth status
+cp .env.example .env        # add only credentials needed by optional integrations
 npm run install:all         # installs root + engine + dashboard + backend
 ```
+
+Stored Claude Code authentication is sufficient for local runs. A
+`CLAUDE_CODE_OAUTH_TOKEN` is optional for unattended environments that cannot
+read the stored login.
 
 ---
 
@@ -79,17 +89,22 @@ Ports are configured via env (`BACKEND_PORT=3434`, `DASHBOARD_PORT=3535`, `LIVE_
 
 ## Dispatch a PRD
 
-Two equivalent paths — pick one.
+### A. MCP tool (one-call path with a known auth limitation)
 
-### A. MCP tool (recommended, one call)
-
-From any Claude Code session with the `acd` MCP server registered:
+From Codex or any MCP client with the `acd` server registered:
 
 ```
 acd_dispatch({ slug, prdContent, targetPath })
 ```
 
 This writes the PRD to `data/prds/<slug>.md`, generates `data/features/<slug>.json`, enables the slug in `data/repo-queue.json`, and starts the harness.
+
+`acd_generate_features` currently uses the Anthropic Messages API and requires
+`ANTHROPIC_API_KEY`, while `run-harness-v2.js` intentionally rejects that
+variable for coding sessions. Do not use this one-call path for OAuth-only runs
+until those environments are separated. Use `acd_start` with a Codex-authored
+PRD and feature JSON as described in the
+[Codex control runbook](docs/CONTROLLING-CLAUDE-CODE-FROM-CODEX.md#reliable-oauth-only-control-loop).
 
 ### B. Supervised launcher (shell)
 
