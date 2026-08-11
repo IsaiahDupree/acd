@@ -2,7 +2,7 @@
 
 import { createInterface } from 'readline';
 import { createServer } from 'http';
-import { existsSync, readFileSync, writeFileSync, appendFileSync, mkdirSync, createWriteStream, unlinkSync, readdirSync, statSync, openSync, readSync, closeSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync, appendFileSync, mkdirSync, unlinkSync, readdirSync, statSync, openSync, readSync, closeSync } from 'fs';
 import * as rateCoord from './rate-limit-coordinator.js';
 import { join, basename, resolve, dirname } from 'path';
 import { spawn, execSync } from 'child_process';
@@ -490,7 +490,6 @@ function acdStart(params) {
 
   const logFile = join(LOGS_DIR, `${slug}.log`);
   const pidFile = join(PIDS_DIR, `${slug}.pid`);
-  const logStream = createWriteStream(logFile, { flags: 'a' });
 
   const args = [
     join(ENGINE_DIR, 'run-harness-v2.js'),
@@ -506,11 +505,20 @@ function acdStart(params) {
     '--until-complete'
   ];
 
-  const child = spawn('node', args, {
-    detached: true,
-    stdio: ['ignore', logStream, logStream],
-    cwd: ACD_ROOT
-  });
+  // spawn() requires stream stdio entries to have an open file descriptor.
+  // createWriteStream() opens asynchronously, which made acd_start race and
+  // fail with ERR_INVALID_ARG_VALUE before every harness launch.
+  const logFd = openSync(logFile, 'a');
+  let child;
+  try {
+    child = spawn('node', args, {
+      detached: true,
+      stdio: ['ignore', logFd, logFd],
+      cwd: ACD_ROOT
+    });
+  } finally {
+    closeSync(logFd);
+  }
 
   child.unref();
 
