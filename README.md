@@ -6,6 +6,10 @@ For the Codex-to-Claude operating procedure, OAuth setup, worktree isolation,
 fleet coordination, and review gates, see
 [`docs/CONTROLLING-CLAUDE-CODE-FROM-CODEX.md`](docs/CONTROLLING-CLAUDE-CODE-FROM-CODEX.md).
 
+For AI-readable docs discovery, start with [`llms.txt`](llms.txt), then
+[`docs/AI-DOCS-INDEX.md`](docs/AI-DOCS-INDEX.md). Machine-readable retrieval
+hints live in [`docs/ai-docs-manifest.json`](docs/ai-docs-manifest.json).
+
 - **Engine** — Node ESM harness: spawns agents, runs a priority queue with a global concurrency cap, coordinates rate limits, and exposes the MCP server.
 - **Dashboard** — Next.js UI for monitoring runs and feature progress.
 - **Backend** — REST API the dashboard reads from.

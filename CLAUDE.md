@@ -6,6 +6,9 @@ Instructions for Claude working **on the ACD package itself**. ACD is a standalo
 
 A harness + queue + dashboard that spawns the `claude` CLI to implement software PRDs feature-by-feature. You write a PRD, ACD generates a testable feature list, queues the project, and runs supervised agents until the features pass.
 
+For fast AI docs discovery, read `llms.txt` first, then `docs/AI-DOCS-INDEX.md`.
+Use `docs/ai-docs-manifest.json` for machine-readable routing and retrieval hints.
+
 ## Canonical Stack (the only files that matter)
 
 | File | Role |

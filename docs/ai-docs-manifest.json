@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-08-11",
+  "project": {
+    "name": "ACD",
+    "path": "/Users/isaiahdupree/Documents/Software/acd",
+    "description": "Autonomous Coding Dashboard: dispatches PRDs and supervises Claude Code agents across target repositories."
+  },
+  "entrypoints": [
+    {
+      "path": "llms.txt",
+      "kind": "ai_entrypoint",
+      "audience": ["ai_agent", "retrieval"],
+      "summary": "Fast repo orientation, read order, operational truths, and token-saving skip rules."
+    },
+    {
+      "path": "docs/AI-DOCS-INDEX.md",
+      "kind": "routing_index",
+      "audience": ["ai_agent", "human_operator"],
+      "summary": "Task router for which docs and code files to read first."
+    },
+    {
+      "path": "README.md",
+      "kind": "operator_readme",
+      "audience": ["human_operator", "ai_agent"],
+      "summary": "Product overview, directory map, install/run commands, dispatch flow, feature schema, MCP tool groups, and spawned-agent capabilities."
+    },
+    {
+      "path": "CLAUDE.md",
+      "kind": "agent_instructions",
+      "audience": ["claude_code", "ai_agent"],
+      "summary": "Rules and conventions for editing ACD itself."
+    },
+    {
+      "path": "docs/CONTROLLING-CLAUDE-CODE-FROM-CODEX.md",
+      "kind": "runbook",
+      "audience": ["codex", "human_operator", "ai_agent"],
+      "summary": "OAuth, worktrees, ACD tools, fleet waves, monitoring, independent review gates, recovery, security boundaries, and current app-wave lessons."
+    }
+  ],
+  "task_routes": [
+    {
+      "task": "control_claude_code_from_codex",
+      "read": [
+        "docs/CONTROLLING-CLAUDE-CODE-FROM-CODEX.md",
+        "README.md#Dispatch a PRD"
+      ],
+      "code_if_needed": [
+        "engine/acd-mcp-server.js",
+        "engine/run-harness-v2.js"
+      ],
+      "skip_by_default": [
+        "dashboard/",
+        "backend/",
+        "data/features/"
+      ]
+    },
+    {
+      "task": "edit_acd_engine",
+      "read": [
+        "CLAUDE.md",
+        "README.md",
+        "engine/paths.js"
+      ],
+      "code_if_needed": [
+        "engine/acd-mcp-server.js",
+        "engine/run-harness-v2.js",
+        "engine/run-queue.js",
+        "engine/watchdog.js",
+        "engine/generate-features.js"
+      ],
+      "verification": [
+        "npm run check"
+      ]
+    },
+    {
+      "task": "debug_runtime_run",
+      "read": [
+        "docs/CONTROLLING-CLAUDE-CODE-FROM-CODEX.md#lessons-from-the-app-wave"
+      ],
+      "runtime_paths": [
+        "data/logs/<slug>.log",
+        "data/pids/<slug>.pid",
+        "data/features/<slug>.json"
+      ],
+      "commands": [
+        "npm run queue -- --status",
+        "npm run status"
+      ]
+    },
+    {
+      "task": "add_or_validate_feature_contract",
+      "read": [
+        "README.md#Feature Schema"
+      ],
+      "code_if_needed": [
+        "engine/validate-features.js",
+        "engine/generate-features.js"
+      ],
+      "verification": [
+        "npm run validate:features"
+      ]
+    },
+    {
+      "task": "change_dashboard",
+      "read": [
+        "README.md#Directory Map",
+        "CLAUDE.md"
+      ],
+      "code_if_needed": [
+        "dashboard/",
+        "backend/src/"
+      ],
+      "verification": [
+        "npm --prefix dashboard run lint"
+      ]
+    }
+  ],
+  "known_hazards": [
+    {
+      "id": "acd-dispatch-api-key-conflict",
+      "summary": "acd_dispatch calls feature generation, which currently requires ANTHROPIC_API_KEY, while the coding harness rejects ANTHROPIC_API_KEY for OAuth-only Claude Code child sessions.",
+      "safe_path": "Write PRD and feature JSON explicitly, then call acd_start with absolute promptPath, featureListPath, and targetPath."
+    },
+    {
+      "id": "shared-worktree-collisions",
+      "summary": "Multiple coding agents must not write to the same checkout.",
+      "safe_path": "Use one branch and one dedicated worktree per running task."
+    },
+    {
+      "id": "stale-runtime-state",
+      "summary": "PID files and manager-reported sessions can outlive real child processes.",
+      "safe_path": "Correlate ACD status, PID, logs, process table, git status, and worktree changes before stopping or accepting a run."
+    }
+  ],
+  "canonical_code": [
+    {
+      "path": "engine/paths.js",
+      "role": "Path and port source of truth. Import from here; do not hardcode paths."
+    },
+    {
+      "path": "engine/acd-mcp-server.js",
+      "role": "ACD MCP server and acd_* tool implementation."
+    },
+    {
+      "path": "engine/run-harness-v2.js",
+      "role": "Per-project Claude Code harness."
+    },
+    {
+      "path": "engine/run-queue.js",
+      "role": "Priority queue and worker slot execution."
+    },
+    {
+      "path": "engine/watchdog.js",
+      "role": "Queue supervision and restart behavior."
+    },
+    {
+      "path": "engine/validate-features.js",
+      "role": "Feature contract validation."
+    }
+  ],
+  "do_not_index_by_default": [
+    "node_modules/",
+    "dashboard/.next/",
+    "backend/dist/",
+    "data/logs/",
+    "data/pids/",
+    "data/metrics/",
+    "engine/telemetry/",
+    "data/features/*.json except the task slug in scope"
+  ]
+}

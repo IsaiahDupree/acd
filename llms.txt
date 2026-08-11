@@ -1,0 +1,62 @@
+# ACD — AI Readme
+
+ACD is the Autonomous Coding Dashboard. It dispatches and supervises Claude Code
+agents that implement PRDs feature-by-feature across target repositories.
+
+Use this file as the first-pass routing map for AI agents. Do not scan the whole
+repo first; read the smallest document that matches the task.
+
+## Fast Read Order
+
+1. `docs/AI-DOCS-INDEX.md`
+   - Best first stop for AI context routing, docs inventory, known hazards, and
+     task-specific read paths.
+2. `README.md`
+   - Product overview, directory map, install/run commands, feature schema, MCP
+     tool categories, and spawned-agent capabilities.
+3. `CLAUDE.md`
+   - Rules for editing ACD itself. Read before changing source code.
+4. `docs/CONTROLLING-CLAUDE-CODE-FROM-CODEX.md`
+   - Operational runbook for using Codex to control Claude Code through ACD:
+     OAuth, worktrees, `acd_start`, monitoring, review gates, recovery, and
+     fleet waves.
+5. `docs/ai-docs-manifest.json`
+   - Machine-readable doc and code-entrypoint manifest for retrieval/indexing.
+
+## What To Read For Common Tasks
+
+- Control Claude Code from Codex:
+  `docs/CONTROLLING-CLAUDE-CODE-FROM-CODEX.md`
+- Edit ACD internals:
+  `CLAUDE.md`, then only the relevant engine/backend/dashboard files.
+- Understand paths and runtime layout:
+  `README.md`, `engine/paths.js`
+- Use MCP tools:
+  `README.md#MCP Tools (26)`, `engine/acd-mcp-server.js`
+- Start OAuth-only coding runs:
+  `docs/CONTROLLING-CLAUDE-CODE-FROM-CODEX.md#reliable-oauth-only-control-loop`
+- Debug stale/running jobs:
+  `docs/CONTROLLING-CLAUDE-CODE-FROM-CODEX.md#lessons-from-the-app-wave`
+- Add or validate feature lists:
+  `README.md#Feature Schema`, `engine/validate-features.js`
+
+## Current Operational Truths
+
+- `acd_start` with a Codex-authored PRD and feature JSON is the reliable
+  OAuth-only path.
+- `acd_dispatch` currently conflicts with OAuth-only coding runs because feature
+  generation still expects `ANTHROPIC_API_KEY`, while the coding harness rejects
+  that variable.
+- ACD uses the real `claude` CLI, not an SDK wrapper, for coding sessions.
+- Target repo writes should happen in dedicated worktrees. Do not point multiple
+  coding agents at the same writable checkout.
+- Codex remains responsible for orchestration, independent review, tests,
+  integration, push/PR/release decisions, and recovery.
+
+## Do Not Waste Tokens On
+
+- `data/features/` unless the task targets a specific slug.
+- `data/logs/`, `data/pids/`, `engine/telemetry/`, or generated package-lock
+  churn unless debugging runtime state.
+- Dashboard or backend files when the task is only about the harness/MCP tools.
+
