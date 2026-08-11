@@ -18,6 +18,7 @@
     "dashboard": "npm --prefix dashboard run dev",
     "backend": "npm --prefix backend run dev",
     "validate:features": "node engine/validate-features.js data/features",
+    "test:docs-accessibility": "node scripts/check-ai-docs-accessibility.mjs",
     "check": "for f in engine/*.js; do node --check \"$f\" || exit 1; done && echo all-engine-ok"
   },
   "keywords": [

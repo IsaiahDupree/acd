@@ -27,6 +27,11 @@ export interface CommandPaletteProps {
   className?: string;
 }
 
+function optionId(action: CommandAction, index: number): string {
+  const safeId = action.id.replace(/[^A-Za-z0-9_-]/g, '-');
+  return `command-palette-option-${index}-${safeId}`;
+}
+
 export function CommandPalette({
   actions,
   placeholder = 'Search or type a command...',
@@ -83,6 +88,9 @@ export function CommandPalette({
 
     return groups;
   }, [filteredActions]);
+
+  const activeAction = filteredActions[selectedIndex];
+  const activeOptionId = activeAction ? optionId(activeAction, selectedIndex) : undefined;
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -175,6 +183,10 @@ export function CommandPalette({
               placeholder={placeholder}
               className="flex-1 py-3 bg-transparent border-none outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400"
               aria-label="Search commands"
+              role="combobox"
+              aria-expanded="true"
+              aria-controls="command-palette-results"
+              aria-activedescendant={activeOptionId}
             />
             <kbd className="hidden sm:inline-flex items-center px-2 py-1 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded border border-gray-300 dark:border-gray-600">
               ESC
@@ -182,24 +194,31 @@ export function CommandPalette({
           </div>
 
           {/* Results */}
-          <div className="max-h-96 overflow-y-auto p-2">
+          <div
+            id="command-palette-results"
+            className="max-h-96 overflow-y-auto p-2"
+            role="listbox"
+            aria-label="Commands"
+          >
             {filteredActions.length === 0 ? (
               <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                 No results found for &quot;{query}&quot;
               </div>
             ) : (
               Object.entries(groupedActions).map(([category, categoryActions]) => (
-                <div key={category} className="mb-4 last:mb-0">
+                <div key={category} className="mb-4 last:mb-0" role="group" aria-label={category}>
                   <div className="px-3 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     {category}
                   </div>
-                  {categoryActions.map((action, index) => {
+                  {categoryActions.map((action) => {
                     const globalIndex = filteredActions.indexOf(action);
                     const isSelected = globalIndex === selectedIndex;
 
                     return (
                       <button
                         key={action.id}
+                        id={optionId(action, globalIndex)}
+                        role="option"
                         onClick={() => executeAction(action)}
                         onMouseEnter={() => setSelectedIndex(globalIndex)}
                         className={`
