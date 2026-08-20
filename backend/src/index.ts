@@ -4764,9 +4764,9 @@ async function runE2ETests(runId: string, featureId?: string) {
 
     let browser: any = null;
     try {
-        browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        browser = await puppeteer.connect({
+            browserURL: 'http://127.0.0.1:9222',
+            defaultViewport: null,
         });
 
         const features = readFeatureList();
@@ -4789,6 +4789,10 @@ async function runE2ETests(runId: string, featureId?: string) {
             };
             run.tests.push(testResult);
 
+            const openPages = await browser.pages();
+            if (openPages.length >= 8) {
+                throw new Error('Shared Chrome tab cap reached (8); E2E run is blocked until a tab is released');
+            }
             const page = await browser.newPage();
             await page.setViewport({ width: 1280, height: 720 });
 
@@ -4833,7 +4837,7 @@ async function runE2ETests(runId: string, featureId?: string) {
         }
     } finally {
         if (browser) {
-            try { await browser.close(); } catch {}
+            try { await browser.disconnect(); } catch {}
         }
     }
 }

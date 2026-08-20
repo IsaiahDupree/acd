@@ -34,7 +34,6 @@
       "Bash(pytest:*)",
       "Bash(jest:*)",
       "Bash(vitest:*)",
-      "Bash(playwright:*)",
       "Bash(tsc:*)",
       "Bash(eslint:*)",
       "Bash(prettier:*)",
