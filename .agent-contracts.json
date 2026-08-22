@@ -1,0 +1,5 @@
+{
+  "schema_version": "1.0",
+  "repository": "acd",
+  "purpose": "Autonomous coding dispatch, isolated worktrees, fleet status, verification, and release control."
+}

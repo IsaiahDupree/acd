@@ -15,3 +15,10 @@ This repository is the clean standalone ACD package. Use `engine/launch.sh`
 for supervised runs, `data/features/` for feature state, and `data/logs/`
 for run logs. Preserve unrelated user changes and follow the workspace-level
 `AGENTS.md` for ACTP architecture, testing, deployment, and safety rules.
+
+## Service and contract discovery
+
+Before changing a service, route, schema, typed model, migration, queue, or
+cross-system payload, read `AGENT_SERVICE_CONTRACTS.md`. Regenerate it with
+`python3 scripts/generate_agent_service_contracts.py` after contract-surface
+changes, and run the same command with `--check` before committing.
