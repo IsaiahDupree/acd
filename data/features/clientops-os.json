@@ -1,0 +1,1036 @@
+{
+  "$schema": "../../schema/feature.schema.json",
+  "project": "ClientOps OS",
+  "slug": "clientops-os",
+  "version": "1.0",
+  "module": "Mobile-first client acquisition, fulfillment, and billing control plane",
+  "description": "Build the governed Rails, SwiftUI, connector, proof, proposal, client, billing, and outbound worker system specified by CLIENTOPS-OS-001.",
+  "targetPath": "/Users/isaiahdupree/Documents/Software/clientops-os",
+  "prd": "CLIENTOPS-OS-001",
+  "totalFeatures": 60,
+  "completedFeatures": 0,
+  "features": [
+    {
+      "id": "COS-001",
+      "title": "Versioned Channel Policy Manifest",
+      "description": "Create the machine-readable Upwork, Fiverr, Direct, Stripe, data-retention, and autonomy policy manifest with source URLs, terms versions, review dates, and fail-closed enablement gates.",
+      "category": "governance",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": [],
+      "acceptance": [
+        "Policy explicitly prohibits custom Upwork ranking, scoring, eligibility, sentiment, UI automation, and marketplace-content model use",
+        "Fiverr marketplace writes are handoff-only and Direct scoring is allowed only for first-party opportunities",
+        "A stale or unsigned terms review prevents production connector writes",
+        "Policy decisions include the exact manifest hash and controlling rule"
+      ],
+      "files": ["packages/policy/channel-policy.yml", "docs/policy/source-register.md"]
+    },
+    {
+      "id": "COS-002",
+      "title": "Unsafe Legacy Path Containment",
+      "description": "Inventory and disable the existing DOM, direct-CDP, auto-submit, auto-approval, speculative public build, and off-platform Upwork paths before any ClientOps connector is enabled.",
+      "category": "security",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-001"],
+      "acceptance": [
+        "Named legacy services and entry points are blocked from production startup and ACTP dispatch",
+        "No ClientOps code can call Safari Upwork automation, Hunter auto-submit, upwork-bid-agent CDP, or legacy off-platform follow-up",
+        "Containment is verified by process, route, registry, and network tests",
+        "Rollback re-enables only non-marketplace read-only components reviewed as safe"
+      ],
+      "files": ["ops/containment/legacy-upwork.yml", "ops/containment/verify.rb"]
+    },
+    {
+      "id": "COS-003",
+      "title": "Credential Rotation and Secret Baseline",
+      "description": "Provide an operator-led rotation/revocation runbook and machine-verifiable production gate for exposed or inherited credentials without exposing their values.",
+      "category": "security",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-002"],
+      "acceptance": [
+        "The known legacy hardcoded credential is removed from runnable configuration and its external rotation is recorded by the operator",
+        "Repository history and current source are scanned without printing secret values",
+        "Production refuses startup while required rotations or revocations are unacknowledged",
+        "All service secrets use vault references with owner, purpose, expiry, and rotation metadata"
+      ],
+      "files": ["docs/runbooks/credential-rotation.md", "ops/security/secret-baseline.rb"]
+    },
+    {
+      "id": "COS-004",
+      "title": "Canonical ClientOps Monorepo and CI",
+      "description": "Scaffold the standalone clientops-os repository with Rails API, native iOS, client portal, connector gateway, engines, worker relay/adapters, shared contracts, docs, and deterministic CI.",
+      "category": "foundation",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-001"],
+      "acceptance": [
+        "Repository structure matches the architecture spec and contains no placeholder provider implementation",
+        "Rails, connector gateway, portal, relay, and worker services expose safe health endpoints",
+        "CI runs format, lint, schema, migration, unit, integration, and security checks",
+        "Developer startup never launches or attaches to a marketplace browser"
+      ],
+      "files": ["README.md", "Gemfile", "Package.swift", "docker-compose.yml", ".github/workflows/ci.yml"]
+    },
+    {
+      "id": "COS-005",
+      "title": "Canonical API, Event, Command, and Receipt Contracts",
+      "description": "Publish OpenAPI 3.1 and JSON Schema 2020-12 contracts for public APIs, domain events, connector actions, approvals, signed worker commands, receipts, and audit envelopes.",
+      "category": "contracts",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-004"],
+      "acceptance": [
+        "Schemas validate all normative examples in the data-contract specification",
+        "Swift and TypeScript clients are generated from reviewed contracts",
+        "Breaking changes fail compatibility tests unless introduced under a new major version",
+        "Provider tool schemas remain private adapter inputs and are not exposed as generic agent tools"
+      ],
+      "files": ["packages/contracts/openapi.yml", "packages/contracts/schemas", "packages/contracts/scripts/compatibility"]
+    },
+    {
+      "id": "COS-006",
+      "title": "Rails Supabase Authentication Boundary",
+      "description": "Implement Rails API authentication using Supabase Auth JWT verification with issuer, audience, signature, expiry, session, and recent-auth checks.",
+      "category": "identity",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-004", "COS-005"],
+      "acceptance": [
+        "Invalid issuer, audience, signature, expiration, or revoked session returns an authenticated Problem Details error",
+        "No privileged Supabase key reaches the iOS app or client portal",
+        "Organization and user IDs are resolved from verified context rather than request bodies",
+        "Health and verified provider-webhook routes are the only documented unauthenticated exceptions"
+      ],
+      "files": ["apps/control_plane/app/controllers/concerns/authentication.rb", "apps/control_plane/config/initializers/supabase_auth.rb"]
+    },
+    {
+      "id": "COS-007",
+      "title": "Organization RBAC and Tenant Isolation",
+      "description": "Implement organizations, memberships, roles, capability policies, and tenant isolation across controllers, jobs, Action Cable, searches, files, and audit views.",
+      "category": "identity",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-006"],
+      "acceptance": [
+        "Every authoritative tenant row carries organization_id",
+        "Policies deny access by default and reject cross-organization identifiers",
+        "Cross-tenant API, background job, realtime channel, signed URL, and search tests pass",
+        "Collaborator roles cannot inherit marketplace credentials or owner-only financial actions"
+      ],
+      "files": ["apps/control_plane/app/domains/identity", "apps/control_plane/db/migrate", "apps/control_plane/spec/security/tenant_isolation_spec.rb"]
+    },
+    {
+      "id": "COS-008",
+      "title": "Authoritative ClientOps Supabase Schema",
+      "description": "Create the dedicated clientops schema, service roles, constraints, indexes, retention fields, and migration ownership for the domain tables in the data specification.",
+      "category": "database",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-005", "COS-007"],
+      "acceptance": [
+        "Rails is the sole writer for authoritative ClientOps tables",
+        "Provider payload blobs are isolated from proof and first-party analytics",
+        "Database constraints prevent a recommendation/score for a non-Direct opportunity",
+        "Migration forward, rollback, and clean-database integration tests pass against Postgres"
+      ],
+      "files": ["apps/control_plane/db/migrate", "apps/control_plane/db/clientops_schema.rb", "apps/control_plane/spec/migrations"]
+    },
+    {
+      "id": "COS-009",
+      "title": "Immutable Audit and Transactional Inbox Outbox",
+      "description": "Implement append-only attributable audit events plus transactional domain outbox and provider inbox processing with chained hashes and versioned event envelopes.",
+      "category": "audit",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-008"],
+      "acceptance": [
+        "Every external action links principal, agent, tool, authorization scope, evidence, exact payload hash, approval, and result",
+        "Outbox events are atomically committed with domain transitions and are idempotently published",
+        "Provider inbox events verify signatures and deduplicate provider event IDs",
+        "Audit exports preserve attribution without retaining expired provider content"
+      ],
+      "files": ["apps/control_plane/app/domains/audit", "apps/control_plane/app/domains/events", "apps/control_plane/spec/integration/audit_spec.rb"]
+    },
+    {
+      "id": "COS-010",
+      "title": "Deterministic Policy and Autonomy Engine",
+      "description": "Implement channel, role, consent, retention, risk, autonomy A0-A5, and action-consequence evaluation in deterministic code with versioned explanations.",
+      "category": "governance",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-001", "COS-008", "COS-009"],
+      "acceptance": [
+        "A model cannot change its own tools, channel, autonomy ceiling, retention, or hard-gate result",
+        "Missing policy, stale policy, unavailable reviewer, and malformed input fail closed",
+        "All channel/action/autonomy matrix cases have deterministic contract tests",
+        "Organization overrides cannot weaken provider or global prohibitions"
+      ],
+      "files": ["apps/control_plane/app/domains/policy", "packages/policy", "apps/control_plane/spec/policy"]
+    },
+    {
+      "id": "COS-011",
+      "title": "Exact-Payload Action Intents and Approvals",
+      "description": "Build immutable action intents, versioned approval requests, challenge/decision endpoints, expiry, supersession, idempotent execution, and ambiguous-write reconciliation.",
+      "category": "approvals",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-009", "COS-010"],
+      "acceptance": [
+        "Approval binds target, payload hash, price/cost, attachments, capability, principal, version, and expiry",
+        "Any payload mutation invalidates approval and creates a new version",
+        "No fail-open or notification-unavailable auto-approval path exists",
+        "Timeout after a possible external write enters ambiguous and cannot auto-retry before reconciliation"
+      ],
+      "files": ["apps/control_plane/app/domains/approvals", "apps/control_plane/app/controllers/api/v1/approvals_controller.rb", "apps/control_plane/spec/approvals"]
+    },
+    {
+      "id": "COS-012",
+      "title": "iOS Device Enrollment, Keychain, and Face ID",
+      "description": "Build native iOS device enrollment, Keychain-backed session material, device keypair/assertions, recent authentication, and Face ID approval binding.",
+      "category": "ios",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-005", "COS-006", "COS-011"],
+      "acceptance": [
+        "Secrets and refresh material are absent from AppStorage, UserDefaults, URLs, logs, notifications, and deep links",
+        "Face ID assertion is bound to the server challenge and exact action intent version",
+        "A lost/revoked device cannot approve or decrypt cached operational data",
+        "Biometric success never bypasses provider confirmation or server policy"
+      ],
+      "files": ["apps/ios/Sources/Security", "apps/ios/Sources/Enrollment", "apps/ios/Tests/SecurityTests"]
+    },
+    {
+      "id": "COS-013",
+      "title": "SwiftUI App Shell and Command Screen",
+      "description": "Build the native SwiftUI navigation shell and Command screen for urgent approvals, blockers, allowed channel counts, client health, money, and worker state.",
+      "category": "ios",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-012"],
+      "acceptance": [
+        "Six primary tabs are Command, Work, Approvals, Clients, Proof, and Workers",
+        "Command distinguishes observed facts, agent drafts, approvals, provider state, and reconciled results",
+        "No Upwork custom score, rank, client-quality label, or pursue recommendation appears",
+        "Dynamic Type, VoiceOver, reduced motion, color contrast, and loading/error/empty states pass UI tests"
+      ],
+      "files": ["apps/ios/Sources/App", "apps/ios/Sources/Features/Command", "apps/ios/UITests/CommandTests"]
+    },
+    {
+      "id": "COS-014",
+      "title": "Policy-Correct Work Lanes",
+      "description": "Build separate Upwork, Fiverr, and Direct Work lanes whose controls, labels, ordering, freshness, and handoff behavior follow the active channel policy.",
+      "category": "ios",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-010", "COS-013"],
+      "acceptance": [
+        "Upwork shows operator queries and provider order with selection and neutral-brief actions only",
+        "Fiverr shows time/deadline/operator tags and marks drafts not sent until reconciled",
+        "Direct shows inspectable score, confidence, components, hard gates, and reasons",
+        "Provider content is visibly sourced and its deletion deadline is available"
+      ],
+      "files": ["apps/ios/Sources/Features/Work", "apps/ios/UITests/WorkLaneTests"]
+    },
+    {
+      "id": "COS-015",
+      "title": "iPhone Approval Center",
+      "description": "Build approval list/detail/revision/reject/snooze flows that render the complete consequential payload, evidence, cost, consequence, expiry, and provider requirement.",
+      "category": "ios",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-011", "COS-012", "COS-013"],
+      "acceptance": [
+        "The exact body, answers, attachments, target, price, cost, and version are viewable before approval",
+        "Approve requires Face ID and a fresh server challenge; edit supersedes the old intent",
+        "Offline decisions cannot execute until authenticated server reconciliation succeeds",
+        "Provider confirmation and upwork.com completion requirements are clearly separate from ClientOps approval"
+      ],
+      "files": ["apps/ios/Sources/Features/Approvals", "apps/ios/UITests/ApprovalTests"]
+    },
+    {
+      "id": "COS-016",
+      "title": "Client, Proof, and Worker Fleet Mobile Surfaces",
+      "description": "Build the Client Cockpit, Proof Vault graph/list, and Worker Fleet surfaces with factual lifecycle, scope, finance, verification, lease, test, artifact, and revocation state.",
+      "category": "ios",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-013"],
+      "acceptance": [
+        "Client Cockpit shows source-backed commitments, scope state, delivery, finance, and next operator decision without sentiment inference",
+        "Proof shows permissions, radius, current verification, limitations, and proposal eligibility",
+        "Fleet shows worker trust, capability, lease expiry, receipts, safe retry/failover, drain, and revoke",
+        "No mobile screen exposes a generic shell, marketplace credential, secret value, or raw sensitive log"
+      ],
+      "files": ["apps/ios/Sources/Features/Clients", "apps/ios/Sources/Features/Proof", "apps/ios/Sources/Features/Workers"]
+    },
+    {
+      "id": "COS-017",
+      "title": "APNs, Action Cable, and REST Reconciliation",
+      "description": "Implement non-sensitive APNs notifications, foreground Action Cable updates, cursor-based event catch-up, and REST reconciliation for mobile background/offline operation.",
+      "category": "realtime",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-009", "COS-012", "COS-013"],
+      "acceptance": [
+        "APNs contains only category, urgency, opaque ID, and generic text",
+        "No workflow depends on a persistent WebSocket and reconnect reconciles missed state",
+        "Duplicate and out-of-order events do not duplicate decisions or external writes",
+        "Authorization and tenant checks apply to every Cable stream and REST cursor"
+      ],
+      "files": ["apps/control_plane/app/channels", "apps/control_plane/app/services/push", "apps/ios/Sources/Transport"]
+    },
+    {
+      "id": "COS-018",
+      "title": "Global and Scoped Kill Switches",
+      "description": "Implement global, organization, connector, worker, task, device, and secret-grant revoke/drain controls with recent authentication and audit.",
+      "category": "security",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-009", "COS-010", "COS-012"],
+      "acceptance": [
+        "Global stop prevents new connector writes, worker dispatch, approvals execution, and secret grants",
+        "Reconciliation, receipt collection, deletion, and security evidence continue safely while stopped",
+        "Revocation reaches active sessions within the documented SLO and survives restart",
+        "Resume requires a new health/policy check and cannot be initiated by an agent"
+      ],
+      "files": ["apps/control_plane/app/domains/security", "apps/ios/Sources/Features/Security", "apps/control_plane/spec/security/kill_switch_spec.rb"]
+    },
+    {
+      "id": "COS-019",
+      "title": "Outbound mTLS Worker Relay",
+      "description": "Build a private relay in which enrolled Mac and Windows workers establish outbound-only mTLS sessions and receive only eligible typed tasks.",
+      "category": "workers",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-005", "COS-007", "COS-018"],
+      "acceptance": [
+        "No inbound home-network control port is required",
+        "Worker identity, organization, certificate status, nonce, and session are verified on connection",
+        "Revoked, expired, wrong-tenant, or unknown worker certificates are rejected",
+        "Relay health exposes counts and latency without task content or secrets"
+      ],
+      "files": ["workers/relay", "packages/contracts/schemas/worker-session.schema.json", "workers/relay/tests"]
+    },
+    {
+      "id": "COS-020",
+      "title": "Signed Commands and Capability Grants",
+      "description": "Issue canonical, signed, expiring, worker-bound commands with typed capability versions, manifest hashes, approval references, runtime bounds, and artifact/secret permissions.",
+      "category": "workers",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-005", "COS-011", "COS-019"],
+      "acceptance": [
+        "Worker verifies signature, key ID, time window, binding, lease, capability grant, revocation, and manifest hashes before execution",
+        "Worker cannot expand a capability or accept changed content under the same command ID",
+        "Marketplace credentials and payload corpora are forbidden command inputs",
+        "Replay, wrong-worker, expired, tampered, and unapproved commands fail before side effects"
+      ],
+      "files": ["apps/control_plane/app/domains/workers/command_issuer.rb", "workers/shared/command-verifier", "workers/shared/tests/command_security"]
+    },
+    {
+      "id": "COS-021",
+      "title": "Worker Leases, Heartbeats, Idempotency, and Failover",
+      "description": "Implement atomic task claims, exclusive expiring leases, monotonic heartbeats, retry classification, idempotent completion, late-receipt handling, and safe Mac/Windows failover.",
+      "category": "workers",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-008", "COS-019", "COS-020"],
+      "acceptance": [
+        "At most one active lease exists per task and only its holder can heartbeat or complete",
+        "Lease expiry does not requeue non-replay-safe work without reconciliation/operator review",
+        "A late completion is audited but cannot overwrite a re-leased task",
+        "Integration test fails the first worker and completes safely on an eligible second worker without duplicate output"
+      ],
+      "files": ["apps/control_plane/app/domains/workers/leases", "workers/relay/lease-manager", "workers/relay/tests/failover"]
+    },
+    {
+      "id": "COS-022",
+      "title": "Scoped Artifact and Secret Grants",
+      "description": "Implement organization-scoped artifact manifests, content-addressed storage, malware/secret/privacy scanning, short-lived signed URLs, and purpose-bound worker secret grants.",
+      "category": "workers",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-008", "COS-020"],
+      "acceptance": [
+        "Artifacts are bound to task/organization, hashed, scanned, classified, and retained by policy",
+        "Secret grants reveal only the required value to the bound worker/process for the allowed time and purpose",
+        "Secret values never enter receipts, application logs, APNs, audit payloads, or client artifacts",
+        "Revocation immediately prevents new retrieval and is recorded in the audit chain"
+      ],
+      "files": ["apps/control_plane/app/domains/artifacts", "apps/control_plane/app/domains/secrets", "workers/shared/artifact-client"]
+    },
+    {
+      "id": "COS-023",
+      "title": "macOS Worker Adapter",
+      "description": "Adapt safe Airtime/Relay execution patterns into a macOS worker for repository, Docker, Xcode/iOS, test, artifact, and preview capabilities under the worker protocol.",
+      "category": "workers",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-020", "COS-021", "COS-022"],
+      "acceptance": [
+        "Only allowlisted typed capabilities execute within an engagement-scoped workspace",
+        "Xcode/iOS, repository test, package, and preview tasks return signed receipts with hashes and limitations",
+        "No browser enumeration, marketplace tab control, arbitrary shell capability, or ambient credential access exists",
+        "Cancellation, timeout, drain, restart recovery, and receipt upload pass integration tests"
+      ],
+      "files": ["workers/macos", "workers/macos/tests"]
+    },
+    {
+      "id": "COS-024",
+      "title": "Windows and Orion Worker Adapter",
+      "description": "Adapt the Orion Python/PowerShell/WSL runner into the same signed worker protocol for Windows, WSL, GPU, packaging, and integration-test capabilities.",
+      "category": "workers",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-020", "COS-021", "COS-022"],
+      "acceptance": [
+        "Workspace confinement and typed command allowlists apply in Windows and WSL paths",
+        "Runner validates signed envelope, lease, runtime, permissions, and secret grants",
+        "Windows/GPU/test/package tasks produce the canonical signed receipt",
+        "Existing direct browser/CDP controls are excluded from the ClientOps adapter"
+      ],
+      "files": ["workers/windows", "workers/windows/tests", "docs/adapters/orion.md"]
+    },
+    {
+      "id": "COS-025",
+      "title": "Worker Fleet Control and Receipt Review",
+      "description": "Expose safe Rails and iOS worker status, logs, artifacts, test receipts, lease state, retry/failover eligibility, drain, revoke, and emergency-stop operations.",
+      "category": "workers",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-016", "COS-021", "COS-023", "COS-024"],
+      "acceptance": [
+        "Operator can distinguish queued, leased, running, review, passed, accepted, failed, ambiguous, and expired states",
+        "Receipt signatures, input/output hashes, tests, warnings, limitations, and artifact scans are verified before display",
+        "Warnings cannot satisfy a required acceptance test",
+        "Retry/failover controls are unavailable when the task is not proven replay safe"
+      ],
+      "files": ["apps/control_plane/app/controllers/api/v1/workers_controller.rb", "apps/ios/Sources/Features/Workers"]
+    },
+    {
+      "id": "COS-026",
+      "title": "Owned Repository and Resource Importer",
+      "description": "Import owned repositories, commits, deployments, app/product pages, demos, case studies, documents, screenshots, test reports, calendars, forms, pricing, and legal pages without marketplace content.",
+      "category": "proof",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-008"],
+      "acceptance": [
+        "Every imported resource has owner, immutable version/hash, source, sensitivity, visibility, and provenance",
+        "Client-owned work is ineligible until explicit display permission is recorded",
+        "Marketplace descriptions, messages, proposals, and outputs cannot enter the resource/proof store",
+        "Import is incremental and does not duplicate unchanged resource versions"
+      ],
+      "files": ["engines/proof/importers", "apps/control_plane/app/domains/proof/resources", "engines/proof/tests/importers"]
+    },
+    {
+      "id": "COS-027",
+      "title": "Resource Permission, Privacy, and Link Health",
+      "description": "Verify ownership/permission, confidentiality, secret and client-data safety, licenses, HTTP/TLS/access/mobile rendering, relevance, expiration, and channel eligibility for every resource version.",
+      "category": "proof",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-026"],
+      "acceptance": [
+        "Broken, stale, private, secret-bearing, misleading, unlicensed, or unauthorized resources fail closed",
+        "Health checks do not bypass authentication or expose protected material",
+        "Permission revocation immediately removes proposal eligibility and triggers affected-draft review",
+        "Each check stores verifier, evidence, timestamp, result, limitation, and expiry"
+      ],
+      "files": ["engines/proof/checks", "apps/control_plane/app/jobs/resource_verification_job.rb", "engines/proof/tests/checks"]
+    },
+    {
+      "id": "COS-028",
+      "title": "Capability Graph and Delivery Radius",
+      "description": "Build the versioned owned capability graph and classify verified capability versions as R0 exact, R1 adaptation, R2 adjacent spike, or R3 unverified.",
+      "category": "proof",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-026", "COS-027"],
+      "acceptance": [
+        "Every radius has evidence, verification contract, limitations, freshness, and reviewer provenance",
+        "R2 requires a private bounded spike before feasibility wording; R3 blocks capability claims",
+        "Marketplace content is mapped transiently to existing nodes but never becomes a persistent node or demand corpus",
+        "Expired/failed proof automatically recomputes eligibility without inventing replacement evidence"
+      ],
+      "files": ["engines/proof/capability_graph", "apps/control_plane/app/domains/proof/capabilities", "engines/proof/tests/capability_graph"]
+    },
+    {
+      "id": "COS-029",
+      "title": "Signed Proof Verification Receipts",
+      "description": "Run real owned verification contracts on eligible workers and issue signed receipts with repository, commit, environment, commands, tests, artifact hashes, limitations, time, worker, and expiry.",
+      "category": "proof",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-021", "COS-027", "COS-028"],
+      "acceptance": [
+        "Receipt signature, worker identity, command/input hash, result, and artifacts verify end to end",
+        "Failed, warning-only, incomplete, stale, or unverifiable runs cannot create eligible proof",
+        "A proof receipt states material limitations and permission basis",
+        "Tampering, worker revocation, resource supersession, or expiry removes current eligibility"
+      ],
+      "files": ["engines/proof/verifier", "apps/control_plane/app/domains/proof/receipts", "engines/proof/tests/receipts"]
+    },
+    {
+      "id": "COS-030",
+      "title": "Claim Ledger and Truth Audit",
+      "description": "Represent each outbound factual statement as an immutable claim linked to eligible evidence, maximum wording, limitations, channel eligibility, expiry, and review state.",
+      "category": "proposal",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-027", "COS-029"],
+      "acceptance": [
+        "Past-work and current-capability claims require valid eligible evidence",
+        "Future work is labeled as a proposed plan rather than completed experience",
+        "Unsupported metrics, testimonials, customers, dates, qualifications, and comparisons are blocked",
+        "Expired/revoked evidence invalidates affected claims and frozen proposals before execution"
+      ],
+      "files": ["engines/proposal/claim_ledger", "engines/proposal/truth_audit", "engines/proposal/tests/truth_audit"]
+    },
+    {
+      "id": "COS-031",
+      "title": "Evidence-Backed Proposal Engine",
+      "description": "Generate concise versioned proposal packets, screening answers, implementation plans, pricing/milestones, questions, claims, limitations, and exact resource manifests with mandatory audits.",
+      "category": "proposal",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-010", "COS-030"],
+      "acceptance": [
+        "Packet directly addresses outcome, uses one to three relevant proof items, states a concise approach/risk/question, and avoids generic praise",
+        "Truth, privacy, channel policy, margin, scope, link, and attachment audits pass before ready state",
+        "Repository dumping, invented familiarity/experience, unrealistic dates, hidden free work, credential requests, and off-platform solicitation fail",
+        "Prompt/model/policy/source versions, unknowns, and exact output hash are recorded"
+      ],
+      "files": ["engines/proposal/composer", "engines/proposal/audits", "engines/proposal/tests"]
+    },
+    {
+      "id": "COS-032",
+      "title": "Proposal Dossier and Packet Review UI",
+      "description": "Show selected-object requirements, verified/missing proof, limitations, capacity facts, price/margin where permitted, delivery estimate, questions, and the exact proposal packet on iPhone.",
+      "category": "ios",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-014", "COS-015", "COS-031"],
+      "acceptance": [
+        "Upwork dossier is a neutral evidence brief without aggregate score, rank, recommendation, client quality, or win probability",
+        "Direct dossier shows inspectable recommendation inputs and hard gates",
+        "Unknown and unverified requirements are prominent and cannot be hidden by generated prose",
+        "Exact claims, limitations, links, attachments, price, answers, and outbound body are reviewable before freeze"
+      ],
+      "files": ["apps/ios/Sources/Features/Dossier", "apps/ios/Sources/Features/ProposalReview", "apps/ios/UITests/ProposalReviewTests"]
+    },
+    {
+      "id": "COS-033",
+      "title": "Private Connector Gateway and OAuth Vault",
+      "description": "Build a TypeScript connector gateway callable only by Rails, with OAuth/PKCE, dynamic registration where supported, encrypted token-vault references, schema mapping, rate controls, and health.",
+      "category": "connectors",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-005", "COS-006", "COS-010", "COS-018"],
+      "acceptance": [
+        "Gateway has no public business API and rejects calls without service identity and authorized action envelope",
+        "OAuth state, PKCE, redirect allowlist, scopes, token encryption/rotation, and revocation tests pass",
+        "Provider credentials never reach Rails logs, iOS, client portal, ACTP, ACD, or home workers",
+        "Gateway cannot independently select actions or bypass Rails policy/approval"
+      ],
+      "files": ["connectors/gateway", "connectors/gateway/src/oauth", "connectors/gateway/tests/security"]
+    },
+    {
+      "id": "COS-034",
+      "title": "Official Upwork OAuth and Tool Discovery",
+      "description": "Authorize the official hosted Upwork MCP endpoint and persist a versioned capability snapshot from live post-OAuth tool discovery rather than assumed tool names.",
+      "category": "upwork",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-001", "COS-033"],
+      "acceptance": [
+        "OAuth succeeds for the operator account and endpoint identity is pinned to the configured official host",
+        "Live tools/list schemas are hashed, terms-linked, expired, and reviewed before enablement",
+        "Unsupported domain actions remain unavailable in API and UI",
+        "Revocation removes tokens, disables capabilities, starts required deletion, and is audited"
+      ],
+      "files": ["connectors/upwork", "connectors/upwork/src/capability-discovery.ts", "connectors/upwork/tests/contracts"]
+    },
+    {
+      "id": "COS-035",
+      "title": "Bounded Operator-Authored Upwork Searches",
+      "description": "Execute saved Upwork searches only from explicit operator-authored keywords, filters, schedule, limit, and provider/operator sort while preserving provider order and provenance.",
+      "category": "upwork",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-014", "COS-034"],
+      "acceptance": [
+        "Every run points to an immutable operator query version and bounded result limit",
+        "ClientOps neither reranks results nor computes fit, win, quality, eligibility, or pursue scores",
+        "Native provider recommendations are labeled and shown in provider order",
+        "Continuous corpus enumeration, automatic pagination, idle/background UI requests, and DOM fallback are absent"
+      ],
+      "files": ["connectors/upwork/src/search-adapter.ts", "apps/control_plane/app/domains/connectors/saved_queries", "connectors/upwork/tests/search_policy"]
+    },
+    {
+      "id": "COS-036",
+      "title": "Upwork TTL Payload Enclave and Deletion",
+      "description": "Store Upwork content in encrypted per-user purpose-bound payload blobs with 24-hour cache and task-output deletion no later than 30 days by default, plus closure/revocation/end-purpose deletion.",
+      "category": "upwork",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-008", "COS-009", "COS-034"],
+      "acceptance": [
+        "Every Upwork blob has purpose, consent, source, encryption key, expires_at, and deletion state",
+        "Content cannot enter proof, embeddings, vector indexes, model datasets, evaluations, benchmarks, general analytics, or long-lived logs",
+        "Deletion removes payload, derivatives, indexes, attachments, and backup references while preserving only lawful non-content audit metadata/hash",
+        "Time-accelerated integration tests prove 24-hour/30-day maximums and immediate revocation/closure deletion"
+      ],
+      "files": ["apps/control_plane/app/domains/connectors/upwork_enclave", "apps/control_plane/app/jobs/provider_data_deletion_job.rb", "apps/control_plane/spec/retention/upwork_spec.rb"]
+    },
+    {
+      "id": "COS-037",
+      "title": "Neutral Upwork Requirement-to-Proof Brief",
+      "description": "For one operator-selected Upwork object, transiently extract factual requirements and map them to existing owned proof, limitations, unknowns, capacity facts, scope questions, and implementation ranges.",
+      "category": "upwork",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-028", "COS-035", "COS-036"],
+      "acceptance": [
+        "Brief creation requires an explicit operator selection and single object reference",
+        "Brief has no aggregate score, recommendation band, automated decision, client quality, or sentiment inference",
+        "Every provider fact cites the source object/timestamp and every capability claim cites owned proof",
+        "Transient requirement content expires with the source payload and is not promoted to the persistent capability graph"
+      ],
+      "files": ["engines/decision/upwork_evidence_brief", "apps/control_plane/app/domains/opportunities/upwork_briefs", "engines/decision/tests/upwork_policy"]
+    },
+    {
+      "id": "COS-038",
+      "title": "Upwork Proposal and Message Draft Mapping",
+      "description": "Map approved internal proposal/message/delivery drafts for an operator-selected object to the live discovered Upwork MCP schemas while preserving AI origin, attribution, limits, attachments, and exact content.",
+      "category": "upwork",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-030", "COS-031", "COS-034", "COS-037"],
+      "acceptance": [
+        "Adapter refuses missing/changed tool capability and validates all provider arguments against the discovered schema",
+        "AI assistance/provenance and principal/agent attribution are preserved",
+        "No draft sends, submits, confirms, accepts, delivers, or spends without a separate authorized action",
+        "Comments are not invented as an Upwork primitive; supported communication maps only to discovered messaging operations"
+      ],
+      "files": ["connectors/upwork/src/draft-adapters", "connectors/upwork/tests/draft_contracts"]
+    },
+    {
+      "id": "COS-039",
+      "title": "Upwork Exact Approval, Confirm, and Reconciliation",
+      "description": "Execute Upwork writes through ClientOps exact-payload approval followed by the provider's separate draft-and-confirm operation, with website handoff and ambiguous-result reconciliation where required.",
+      "category": "upwork",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-011", "COS-015", "COS-034", "COS-038"],
+      "acceptance": [
+        "Proposal, message, attachment, delivery, and other consequential actions require an unexpired matching Face ID-backed approval",
+        "ClientOps approval never substitutes for Upwork confirmation or required upwork.com completion",
+        "Provider draft, confirmation, result IDs, payload hash, Connect/cost, attribution, and outcome are receipted",
+        "Timeout/ambiguous acceptance blocks retry until provider reconciliation proves the outcome"
+      ],
+      "files": ["connectors/upwork/src/action-executor.ts", "connectors/upwork/src/reconciler.ts", "connectors/upwork/tests/write_flow"]
+    },
+    {
+      "id": "COS-040",
+      "title": "Discovered Upwork Lifecycle Views",
+      "description": "Expose invitations, offers, proposals, messages, contracts, delivery, time, earnings, profile, and agency views only to the extent confirmed by the current discovered MCP surface and operator authorization.",
+      "category": "upwork",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-034", "COS-036", "COS-039"],
+      "acceptance": [
+        "Each view/action has an adapter contract tied to a capability snapshot and disappears safely when unsupported",
+        "Binding, contractual, and financial actions respect provider handoff and A4/A5 rules",
+        "No agent ranking, eligibility decision, sentiment, or social scoring is derived from lifecycle data",
+        "All raw content follows Upwork purpose, consent, cache, task-output, and deletion rules"
+      ],
+      "files": ["connectors/upwork/src/lifecycle-adapters", "apps/control_plane/app/domains/connectors/upwork", "apps/ios/Sources/Features/Work/UpworkLifecycle"]
+    },
+    {
+      "id": "COS-041",
+      "title": "Upwork Policy, Attribution, and Retention Test Suite",
+      "description": "Create release-blocking integration tests proving the official-only connector boundary, no custom ranking, bounded searches, AI attribution, approval/confirmation, content isolation, deletion, and auditable agent operations.",
+      "category": "upwork",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-035", "COS-036", "COS-037", "COS-038", "COS-039", "COS-040"],
+      "acceptance": [
+        "Static and runtime tests fail on browser automation, cookie replay, DOM/CDP dependencies, continuous corpus monitoring, or third-party scraping",
+        "Database/API tests prove no Upwork score/recommendation can be persisted or returned",
+        "Attribution and exact action log export can be produced without expired content",
+        "Retention tests prove content and all derivatives are deleted on every required trigger"
+      ],
+      "files": ["spec/compliance/upwork", "ops/compliance/upwork-release-gate.rb"]
+    },
+    {
+      "id": "COS-042",
+      "title": "Engagement, Contract, Scope, and Milestone State Machines",
+      "description": "Convert a won marketplace or accepted Direct proposal into one authoritative engagement with contract, immutable scope versions, deliverables, milestones, dependencies, risks, and acceptance tests.",
+      "category": "fulfillment",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-008", "COS-009", "COS-031"],
+      "acceptance": [
+        "Invalid lifecycle transitions return state conflicts and cannot be coerced by a model",
+        "Every active deliverable points to an accepted scope version and typed acceptance contract",
+        "Marketplace contract facts preserve provider references and retention boundaries",
+        "No fulfillment dispatch occurs before engagement and accepted scope except an approved private bounded spike"
+      ],
+      "files": ["apps/control_plane/app/domains/engagements", "apps/control_plane/app/domains/scope", "apps/control_plane/spec/state_machines"]
+    },
+    {
+      "id": "COS-043",
+      "title": "Factual Communication Agent",
+      "description": "Extract source-backed questions, answers, decisions, commitments, dependencies, due dates, missing inputs, and scope-change candidates and produce attributable reply/status drafts.",
+      "category": "communication",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-010", "COS-030", "COS-042"],
+      "acceptance": [
+        "Every extracted fact links its source message/content reference and confidence",
+        "The agent does not infer emotion, personality, honesty, trustworthiness, health, or protected traits",
+        "Upwork drafts use official confirmation; Fiverr drafts remain not sent; Direct sends obey explicit category/recipient/quiet-hour policy",
+        "Client or provider text cannot alter system policy, tool access, destination, or retention"
+      ],
+      "files": ["engines/communication", "apps/control_plane/app/domains/conversations", "engines/communication/tests"]
+    },
+    {
+      "id": "COS-044",
+      "title": "Scope Guard and Change Orders",
+      "description": "Compare new factual requests with the accepted scope and classify included, ambiguous, change candidate, or prohibited/unsafe, with cited clauses and time/cost/dependency impact.",
+      "category": "fulfillment",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-042", "COS-043"],
+      "acceptance": [
+        "Classification cites exact scope and request versions and records unknown/conflicting terms",
+        "Material scope, price, acceptance, or schedule changes require an immutable change request and A4 decision",
+        "Agent cannot accept the client's interpretation or promise a date/price autonomously",
+        "Regression tests cover included allowance, ambiguity, scope expansion, prohibited request, and superseded scope"
+      ],
+      "files": ["engines/scope_guard", "apps/control_plane/app/domains/scope/change_requests", "engines/scope_guard/tests"]
+    },
+    {
+      "id": "COS-045",
+      "title": "Typed Fulfillment DAG and ACD Adapter",
+      "description": "Create acceptance-driven task graphs and a narrow authenticated adapter that dispatches canonical ACD or workers only against explicit engagement repositories/worktrees and capabilities.",
+      "category": "fulfillment",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-021", "COS-042"],
+      "acceptance": [
+        "Task DAG encodes dependencies, acceptance contracts, runtime/cost bounds, inputs, artifacts, retry class, and owner",
+        "ACD dispatch cannot run arbitrary topics or create public speculative repositories/deployments during acquisition",
+        "Status, logs, tests, artifacts, cancellation, and receipts reconcile to the engagement task",
+        "A private bounded feasibility spike requires explicit operator approval, time/cost ceiling, and no client deliverable"
+      ],
+      "files": ["engines/delivery/task_graph", "apps/control_plane/app/adapters/acd_adapter.rb", "engines/delivery/tests/acd_integration"]
+    },
+    {
+      "id": "COS-046",
+      "title": "Delivery QA, Package, and Submission Approval",
+      "description": "Assemble versioned client delivery packages from scanned artifacts, passing acceptance tests, review results, limitations, release notes, and exact provider/direct submission content.",
+      "category": "fulfillment",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-022", "COS-029", "COS-039", "COS-045"],
+      "acceptance": [
+        "Required contractual tests pass and artifact hashes match the frozen package before ready state",
+        "Warnings, limitations, excluded work, and required client steps are visible",
+        "Submission requires exact-payload approval and provider confirmation/manual handoff as the channel requires",
+        "A documented operator exception names failed criteria, risk, client disclosure, and policy basis"
+      ],
+      "files": ["engines/delivery/package_builder", "apps/control_plane/app/domains/delivery", "engines/delivery/tests/package_acceptance"]
+    },
+    {
+      "id": "COS-047",
+      "title": "Unified Client Cockpit",
+      "description": "Build the authoritative client/engagement API and mobile cockpit for stage, value/margin, milestones, factual conversation state, scope, inputs, delivery, workers, proof, payments, risks, and next decision.",
+      "category": "clients",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-016", "COS-042", "COS-043", "COS-044", "COS-046"],
+      "acceptance": [
+        "Cockpit data reconciles one authoritative engagement across channel, scope, delivery, and finance",
+        "Risk labels cite objective events and never use sentiment/personality/trustworthiness inference",
+        "Open client inputs, commitments, decisions, and due dates retain source pointers",
+        "Tenant, role, retention, and sensitive-artifact rules apply to every view"
+      ],
+      "files": ["apps/control_plane/app/queries/client_cockpit_query.rb", "apps/ios/Sources/Features/Clients"]
+    },
+    {
+      "id": "COS-048",
+      "title": "Direct Lead Intake and Qualification",
+      "description": "Ingest owned website forms, referrals, CRM records, prior-client re-engagement, and operator entry into deduplicated first-party Direct opportunities with consent and missing-information workflows.",
+      "category": "direct",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-008", "COS-010"],
+      "acceptance": [
+        "Each lead has owned source, consent/purpose, provenance, organization, dedup key, qualification state, and retention",
+        "Qualification separates facts, unknowns, assumptions, client inputs, and evidence",
+        "Unsafe credential requests, absent qualifications, prohibited work, and essential unknowns raise hard-gate candidates",
+        "No Upwork/Fiverr content is copied into Direct to obtain scoring or longer retention"
+      ],
+      "files": ["connectors/direct", "apps/control_plane/app/domains/opportunities/direct", "connectors/direct/tests"]
+    },
+    {
+      "id": "COS-049",
+      "title": "Direct Opportunity Recommendation Model",
+      "description": "Implement the specified direct-only weighted model for capability fit, proof, win probability, expected contribution margin, client quality, strategic/timing/learning fit, risk penalty, confidence, and freshness.",
+      "category": "direct",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-028", "COS-048"],
+      "acceptance": [
+        "Formula weights exactly match the approved specification and every component is inspectable/evidence-backed",
+        "Unknown is distinct from zero and reduces confidence or returns needs_information",
+        "Database, API, job, and UI reject this model for any non-Direct opportunity",
+        "Same versioned inputs produce the same score, component explanation, confidence, and band"
+      ],
+      "files": ["engines/decision/direct_ranker", "engines/decision/tests/direct_ranker", "apps/control_plane/app/domains/opportunities/direct_recommendations"]
+    },
+    {
+      "id": "COS-050",
+      "title": "Direct Hard Gates and Explainability",
+      "description": "Add non-overridable truth, proof, capacity, deadline, margin, credential, qualification, legal/safety, performer-disclosure, and missing-information gates to Direct decisions.",
+      "category": "direct",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-030", "COS-049"],
+      "acceptance": [
+        "A high score cannot override a blocking gate",
+        "Every gate records controlling fact, evidence, status, resolution requirement, policy version, and reviewer",
+        "UI explains strong, weak, unknown, blocked, and next-action facts without hiding uncertainty",
+        "First-party weight/threshold experiments require version, sample gate, holdout, drift check, rollback, and operator promotion"
+      ],
+      "files": ["engines/decision/direct_gates", "apps/ios/Sources/Features/Work/DirectRecommendation", "engines/decision/tests/direct_gates"]
+    },
+    {
+      "id": "COS-051",
+      "title": "Direct Client Portal",
+      "description": "Build the responsive authenticated direct-client portal for proposal/scope acceptance, terms, messages, inputs, milestones, files, deliverables, decisions, change requests, invoices, receipts, retainers, and support.",
+      "category": "direct",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-007", "COS-042", "COS-043", "COS-044", "COS-046"],
+      "acceptance": [
+        "Client sees only explicitly shared resources for their own engagement and organization",
+        "Scope/terms/deliverable decisions bind to immutable exact versions and are auditable",
+        "Credential/input requests state purpose, scope, recipient, expiry, and revocation and never appear in ordinary messages",
+        "Portal cannot set organization, price, paid status, approval, artifact visibility, or provider identifiers from browser-supplied values"
+      ],
+      "files": ["apps/client_portal", "apps/control_plane/app/controllers/api/v1/portal", "apps/client_portal/tests"]
+    },
+    {
+      "id": "COS-052",
+      "title": "Stripe Direct-Client Commercial Lifecycle",
+      "description": "Integrate Stripe Checkout, Billing, Invoicing, server-allowlisted Payment Links, and Customer Portal for Starfield's own one-time, subscription, retainer, and invoiced engagements.",
+      "category": "billing",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-011", "COS-042", "COS-051"],
+      "acceptance": [
+        "Prices, amounts, products, organization, customer, and commercial terms resolve from a server-owned accepted offer",
+        "Checkout success redirect is never treated as paid state",
+        "Contracts, unusual refunds, material price/scope changes, and money-moving actions require the configured A4/provider controls",
+        "Stripe Connect code and configuration are absent from v1 and a documented trigger governs future review"
+      ],
+      "files": ["apps/control_plane/app/domains/billing/stripe", "apps/control_plane/app/controllers/api/v1/checkouts_controller.rb", "apps/control_plane/spec/billing"]
+    },
+    {
+      "id": "COS-053",
+      "title": "Stripe Webhook Ledger and Reconciliation",
+      "description": "Verify Stripe webhook signatures, store an immutable event inbox, deduplicate event IDs, process out of order, and reconcile authoritative provider object state transactionally.",
+      "category": "billing",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-009", "COS-052"],
+      "acceptance": [
+        "Invalid signatures fail before persistence or side effects",
+        "Repeated and concurrent delivery of one event cannot create duplicate value or state transition",
+        "Out-of-order subscription, invoice, payment, dispute, and refund events reconcile to current Stripe objects",
+        "Every internal payment transition links the provider event/object and reconciliation receipt"
+      ],
+      "files": ["apps/control_plane/app/controllers/webhooks/stripe_controller.rb", "apps/control_plane/app/domains/billing/stripe_event_processor.rb", "apps/control_plane/spec/billing/stripe_webhooks_spec.rb"]
+    },
+    {
+      "id": "COS-054",
+      "title": "Finance and Capacity Engine",
+      "description": "Track expected/recognized revenue, marketplace/payment fees, labor, model/API, infrastructure, vendor, hardware cost, contribution margin, invoice/payment state, retainers, capacity, and objective delivery risk.",
+      "category": "operations",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-042", "COS-049", "COS-053"],
+      "acceptance": [
+        "Every value states currency, source, estimate/actual status, timestamp, and confidence",
+        "Contribution margin and variance reconcile from immutable cost and revenue entries",
+        "Capacity includes worker capability/time and operator review time without promising impossible dates",
+        "The engine recommends but cannot accept contracts, move money, issue unusual refunds, or alter material terms"
+      ],
+      "files": ["engines/finance", "apps/control_plane/app/domains/finance", "engines/finance/tests"]
+    },
+    {
+      "id": "COS-055",
+      "title": "Fiverr Notification and Deadline Ingestion",
+      "description": "Ingest supported user-authorized email notification metadata and operator-entered Fiverr references into minimal, attributable conversation/order/deadline records without scraping or invented API access.",
+      "category": "fiverr",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-001", "COS-008", "COS-010"],
+      "acceptance": [
+        "Only configured supported notification sources and minimal necessary fields are ingested",
+        "Records preserve source, receipt time, external reference, attribution, purpose, and deletion policy",
+        "No login cookie, DOM, RPA, scraping, mass-message, artificial activity, or unsupported webhook/API is used",
+        "Parsing failure or missing data remains unknown and cannot create a fake order/message state"
+      ],
+      "files": ["connectors/fiverr/notification-ingestor", "connectors/fiverr/tests", "apps/control_plane/app/domains/connectors/fiverr"]
+    },
+    {
+      "id": "COS-056",
+      "title": "Fiverr Draft and Official-Interface Handoff",
+      "description": "Prepare response, custom-offer, order-plan, deadline, extension, and delivery drafts with Team Account attribution and a secure checklist/copy/open handoff to Fiverr's official interface.",
+      "category": "fiverr",
+      "priority": "high",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-014", "COS-030", "COS-031", "COS-043", "COS-055"],
+      "acceptance": [
+        "Every draft is clearly not sent until a human/provider reconciliation records the official action",
+        "Handoff includes exact content, attachments, target reference, attribution, checklist, and expiry without transferring credentials",
+        "Team member attribution and role limitations are displayed and audited",
+        "No automated Fiverr message, offer, gig mutation, order action, or delivery path exists in v1"
+      ],
+      "files": ["connectors/fiverr/handoff", "apps/ios/Sources/Features/Work/Fiverr", "connectors/fiverr/tests/handoff"]
+    },
+    {
+      "id": "COS-057",
+      "title": "Prompt Injection and Artifact Safety Pipeline",
+      "description": "Treat provider/client text, links, files, repository content, logs, and model output as untrusted; isolate parsing and block instruction injection, secret exfiltration, unsafe destinations, and malicious artifacts.",
+      "category": "security",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-010", "COS-022", "COS-031", "COS-043"],
+      "acceptance": [
+        "Untrusted content cannot change policy, tools, autonomy, recipient, URL, secret scope, retention, or approval",
+        "Links and attachments are normalized, scanned, sandboxed/quarantined, and require an allowlisted purpose before retrieval",
+        "Malicious fixtures cover indirect prompt injection, hidden text, archive traversal, executable masquerade, SSRF, and secret requests",
+        "Detection produces a factual security event and safe operator review without executing embedded instructions"
+      ],
+      "files": ["packages/security/content-boundary", "engines/security/artifact_scanner", "spec/security/prompt_injection"]
+    },
+    {
+      "id": "COS-058",
+      "title": "Retention, Tenant, Replay, and Failure Security Suite",
+      "description": "Build release-blocking integration and property tests for tenant isolation, provider deletion, approval mutation/replay, command signatures, secret boundaries, ambiguous writes, leases/failover, billing deduplication, and kill switches.",
+      "category": "testing",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-018", "COS-021", "COS-036", "COS-041", "COS-053", "COS-057"],
+      "acceptance": [
+        "Tests use real parsers, test HTTP servers, test Postgres/storage, and official provider test modes where available rather than mocked success",
+        "All cross-tenant access, stale approval, replay/tamper, secret leak, expired content, duplicate write, and unsafe retry cases fail closed",
+        "Time-accelerated deletion and lease tests are deterministic",
+        "A failed critical test prevents build promotion and connector write enablement"
+      ],
+      "files": ["spec/system/security", "spec/system/retention", "spec/system/failure_modes"]
+    },
+    {
+      "id": "COS-059",
+      "title": "Production Observability, SLOs, and Runbooks",
+      "description": "Instrument safe health, metrics, traces, audit continuity, queues, connector capability/terms freshness, deletion lag, approvals, workers, billing reconciliation, proof expiry, and delivery outcomes with operational runbooks.",
+      "category": "operations",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-009", "COS-017", "COS-018", "COS-025", "COS-053"],
+      "acceptance": [
+        "Dashboards and alerts cover the SLOs and failure signals defined in the Delivery Plan without raw provider/client content",
+        "Runbooks cover connector revoke/terms change, deletion breach, audit gap, worker compromise, ambiguous write, Stripe discrepancy, and global stop",
+        "Synthetic health checks cannot cause external writes or browser activity",
+        "Alert delivery failure is observable and never changes an approval decision"
+      ],
+      "files": ["ops/observability", "docs/runbooks", "apps/control_plane/app/controllers/health_controller.rb"]
+    },
+    {
+      "id": "COS-060",
+      "title": "End-to-End Production Canary and Acceptance Evidence",
+      "description": "Run the staged production canary and attach signed evidence for every ClientOps MVP acceptance criterion before broader enablement.",
+      "category": "release",
+      "priority": "critical",
+      "status": "todo",
+      "passes": false,
+      "dependencies": ["COS-003", "COS-013", "COS-015", "COS-025", "COS-032", "COS-041", "COS-046", "COS-047", "COS-050", "COS-051", "COS-053", "COS-054", "COS-056", "COS-058", "COS-059"],
+      "acceptance": [
+        "A signed iPhone approval dispatches a scoped task to Mac, fails over safely to Windows where eligible, and returns a verified receipt",
+        "A bounded operator-authored Upwork search reaches neutral brief, truthful packet, exact approval, provider confirmation, receipt, and on-time deletion without ranking or browser automation",
+        "A Direct lead reaches recommendation, accepted proposal/scope, Stripe payment, fulfillment, acceptance, delivery, reconciliation, and contribution-margin reporting",
+        "A Fiverr notification reaches attributable draft and official-interface handoff without automated marketplace action",
+        "No critical/high finding, unauthorized/duplicate action, unsupported claim, cross-tenant event, secret leak, failed retention deadline, or missing audit link remains",
+        "Operator signs the current terms/capability review and every production acceptance criterion has a linked test or signed receipt"
+      ],
+      "files": ["ops/release/clientops-canary.yml", "docs/release/mvp-acceptance-evidence.md", "spec/system/clientops_e2e"]
+    }
+  ]
+}
