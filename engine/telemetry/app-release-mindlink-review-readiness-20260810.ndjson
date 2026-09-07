@@ -1,0 +1,3 @@
+{"ts":"2026-08-11T00:58:50.589Z","slug":"app-release-mindlink-review-readiness-20260810","event":"session_start","session":1,"model":"claude-sonnet-4-6","featuresTotal":5,"featuresPassing":0}
+{"ts":"2026-08-11T01:35:15.533Z","slug":"app-release-mindlink-review-readiness-20260810","event":"feature_passed","session":1,"featuresDelta":5,"newPassing":5}
+{"ts":"2026-08-11T01:35:15.535Z","slug":"app-release-mindlink-review-readiness-20260810","event":"session_end","session":1,"duration_ms":2184898,"featuresDelta":5,"tokens":288484,"cost":6.004679900000004,"exitCode":0}
