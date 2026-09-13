@@ -106,7 +106,7 @@ As observed on 2026-08-30:
 - The workspace contains several real Upwork prototypes, but they use
   incompatible schemas and unsafe browser/approval paths. They are migration
   sources, not the production connector.
-- The browser singleton enforcer was healthy: one approved Chrome process,
+- The Chrome-only resource guard was healthy: one capped local Chrome process,
   three tabs, no unauthorized browser processes, and Safari with no tabs.
 - No first-party public Fiverr seller API for messages, offers, orders, or
   delivery writes was verified. Fiverr v1 is an assisted handoff.

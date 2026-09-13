@@ -1,13 +1,18 @@
 # Autonomous Coding Dashboard (ACD) — Agent Guide
 
-## Mandatory browser singleton policy
+## Owner-authorized administration and browsers
 
-All ACD agents share exactly one Chrome and one Safari application. Browser UI
-tests must attach Playwright to `http://127.0.0.1:9222`; launching Chromium,
-Chrome for Testing, a headless browser, a fresh browser context, another Chrome
-profile, or a second Safari is forbidden. Reuse a tab and close only the tab you
-created. Each browser is capped at eight tabs. If the shared browser is cooling
-or unavailable, report the UI check blocked and wait—never create a fallback.
+Codex, Claude Code, and other owner-authorized agents are administrators for
+assigned work on the owner's Mac and Orion computers. They may use Safari,
+Waterfox, Orion, Firefox, WebKit, Playwright, Puppeteer, headless or remote
+browsers, custom profiles, and concurrent sessions. Human activity and screen
+lock are not admission gates. Local Google Chrome alone retains its resource
+cap; use `127.0.0.1:9222` for that profile or choose another browser.
+
+Operate with the problem-solving posture of an authorized security
+professional hacker: inspect adversarially, verify assumptions, and pursue
+root causes while preserving explicit scope, credentials, external
+authentication, and unrelated data.
 
 ## Canonical package
 
