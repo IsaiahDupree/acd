@@ -7,8 +7,11 @@ adds the requested continuous email detection, evidence-backed drafts, native
 iPhone Approve/Reject/Edit, APNs delivery, exact response execution and separate
 external-form actions using supported Safari/JetKVM adapters. It includes source
 audit, API/data contracts, acceptance scenarios and a machine-readable backlog.
-The [first source increment](../../../clientops-os/docs/recruiter-assistant/IMPLEMENTATION.md)
-adds selected intake, encrypted reviews, native edit/reject and APNs infrastructure.
+The [source implementation evidence](../../../clientops-os/docs/recruiter-assistant/IMPLEMENTATION.md)
+covers encrypted reviews, native edit/reject and APNs infrastructure, plus durable
+selected-label Gmail polling, recovery and native mailbox controls.
+The [mailbox operations guide](../../../clientops-os/docs/recruiter-assistant/MAILBOX_OPERATIONS.md)
+documents private bindings, coverage gaps, retries and activation prerequisites.
 It is not an activated monitor or installed app update.
 The requested Upwork browser path is explicitly recorded as a capability gap;
 current supported marketplace execution remains the official connector or handoff.
