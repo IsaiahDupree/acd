@@ -18,9 +18,10 @@ Detailed requirements and software specifications for continuous recruiter-email
 detection, grounded reply/application preparation, native iOS Approve/Reject/Edit,
 APNs, durable execution/reconciliation and supported Safari/JetKVM external forms
 are in [the canonical extension package](../../../clientops-os/docs/recruiter-assistant/README.md).
-Its backlog is a design artifact with implementation still planned. It does not
-enable outbound messaging, retire existing tests, authorize unsupported provider
-access, or establish a new production/iPhone deployment.
+Its backlog tracks a first source increment for selected Gmail intake, encrypted
+reviews, native editing/rejection and APNs infrastructure; the complete unattended
+workflow remains open. See [implementation evidence](../../../clientops-os/docs/recruiter-assistant/IMPLEMENTATION.md).
+This does not enable outbound messaging or establish a new production/iPhone deployment.
 
 ## Mission
 
