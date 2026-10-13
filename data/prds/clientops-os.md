@@ -12,6 +12,16 @@ date: 2026-08-30
 
 # ClientOps OS — Master Product Requirements Document
 
+### Recruiter response extension (2026-10-12)
+
+Detailed requirements and software specifications for continuous recruiter-email
+detection, grounded reply/application preparation, native iOS Approve/Reject/Edit,
+APNs, durable execution/reconciliation and supported Safari/JetKVM external forms
+are in [the canonical extension package](../../../clientops-os/docs/recruiter-assistant/README.md).
+Its backlog is a design artifact with implementation still planned. It does not
+enable outbound messaging, retire existing tests, authorize unsupported provider
+access, or establish a new production/iPhone deployment.
+
 ## Mission
 
 Build a mobile-first, auditable control plane that lets Isaiah acquire,

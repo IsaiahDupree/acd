@@ -1,5 +1,18 @@
 # ClientOps OS Specification
 
+## Recruiter response extension — 2026-10-12
+
+The [Recruiter Response Assistant specification](../../../clientops-os/docs/recruiter-assistant/README.md)
+adds the requested continuous email detection, evidence-backed drafts, native
+iPhone Approve/Reject/Edit, APNs delivery, exact response execution and separate
+external-form actions using supported Safari/JetKVM adapters. It includes source
+audit, API/data contracts, acceptance scenarios and a machine-readable backlog.
+This is a specification delivery, not an activated monitor or installed app update.
+The requested Upwork browser path is explicitly recorded as a capability gap;
+current supported marketplace execution remains the official connector or handoff.
+
+## Master specification baseline
+
 **Status:** implementation-ready product and technical specification
 
 **Version:** 1.0
